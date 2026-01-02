@@ -1,0 +1,21 @@
+# Invoice Confirmation App - Dependências
+
+# Framework GUI
+PySide6==6.6.0
+
+# Processamento de dados
+pandas==2.1.4
+openpyxl==3.1.2
+xlsxwriter==3.1.9
+
+# Leitura de PDFs
+PyPDF2==3.0.1
+
+# Fuzzy matching e normalização de texto
+python-Levenshtein==0.23.0
+
+# Geração de relatórios PDF
+reportlab==4.0.7
+
+# Utilitários
+python-dateutil==2.8.2
