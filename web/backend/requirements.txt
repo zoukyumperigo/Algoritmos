@@ -1,0 +1,17 @@
+# Backend Web - Invoice Confirmation API
+
+# Framework Web
+fastapi==0.108.0
+uvicorn[standard]==0.25.0
+
+# CORS e upload de ficheiros
+python-multipart==0.0.6
+
+# Reutiliza dependências do projeto principal
+pandas==2.1.4
+openpyxl==3.1.2
+xlsxwriter==3.1.9
+PyPDF2==3.0.1
+python-Levenshtein==0.23.0
+reportlab==4.0.7
+python-dateutil==2.8.2
