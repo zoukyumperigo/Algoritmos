@@ -1,0 +1,17 @@
+# Sales Agent B2B - Requirements
+# Python 3.8+
+
+# Core dependencies (built-in, no installation needed)
+# - dataclasses (Python 3.7+)
+# - decimal
+# - typing
+# - enum
+# - datetime
+
+# Optional dependencies for production
+# requests>=2.31.0  # Para integração com APIs de WhatsApp
+# python-dotenv>=1.0.0  # Para configuração
+# pytest>=7.4.0  # Para testes
+
+# Integration with other agents
+# ../pricing_margin_agent  # Para verificação de margens
