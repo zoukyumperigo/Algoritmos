@@ -14,6 +14,7 @@ const App = {
 
     // UI instances
     importUI: null,
+    routeUI: null,
     pickingUI: null,
     historyUI: null,
     forecastUI: null,
@@ -66,6 +67,10 @@ function initializeApp() {
             App.validator
         );
 
+        App.routeUI = new RouteUI(
+            App.storage
+        );
+
         App.pickingUI = new PickingUI(
             App.storage,
             App.picker
@@ -90,6 +95,7 @@ function initializeApp() {
         );
 
         // Make UI instances globally accessible for cross-module communication
+        window.routeUI = App.routeUI;
         window.pickingUI = App.pickingUI;
         window.forecastUI = App.forecastUI;
         window.stockUI = App.stockUI;
@@ -148,6 +154,9 @@ function switchView(viewName) {
 
     // Refresh view data
     switch (viewName) {
+        case 'route':
+            App.routeUI.refresh();
+            break;
         case 'picking':
             App.pickingUI.refresh();
             break;

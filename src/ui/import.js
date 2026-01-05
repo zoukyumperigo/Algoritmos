@@ -284,7 +284,10 @@ class ImportUI {
         this.parsedContainer.style.display = 'none';
         this.currentOrders = [];
 
-        // Trigger refresh of picking list
+        // Trigger refresh of route and picking list
+        if (window.routeUI) {
+            window.routeUI.refresh();
+        }
         if (window.pickingUI) {
             window.pickingUI.refresh();
         }

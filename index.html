@@ -22,6 +22,7 @@
         <!-- NAVIGATION -->
         <nav class="main-nav">
             <button class="nav-btn active" data-view="import">📥 Importar Pedidos</button>
+            <button class="nav-btn" data-view="route">🚚 Gestão de Rotas</button>
             <button class="nav-btn" data-view="picking">📋 Lista de Picking</button>
             <button class="nav-btn" data-view="history">📊 Histórico</button>
             <button class="nav-btn" data-view="forecast">📈 Previsão de Compras</button>
@@ -75,6 +76,20 @@ Restaurant Golden Dragon
                         </div>
                     </div>
                 </div>
+            </section>
+
+            <!-- ROUTE MANAGEMENT VIEW -->
+            <section id="routeView" class="view">
+                <div class="view-header">
+                    <h2>Gestão de Rotas</h2>
+                    <p class="help-text">
+                        Visualize pedidos agrupados por distribuidor e mude rotas manualmente
+                    </p>
+                    <div style="margin-top: 15px;">
+                        <button id="refreshRoutesBtn" class="btn-primary">🔄 Atualizar</button>
+                    </div>
+                </div>
+                <div id="routeContainer" class="route-container"></div>
             </section>
 
             <!-- PICKING LIST VIEW -->
@@ -165,6 +180,7 @@ Restaurant Golden Dragon
     <script src="src/services/picker.js"></script>
     <script src="src/services/analytics.js"></script>
     <script src="src/ui/import.js"></script>
+    <script src="src/ui/route.js"></script>
     <script src="src/ui/picking.js"></script>
     <script src="src/ui/history.js"></script>
     <script src="src/ui/forecast.js"></script>
