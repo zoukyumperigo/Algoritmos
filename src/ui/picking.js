@@ -17,6 +17,7 @@ class PickingUI {
         this.container = document.getElementById('pickingListContainer');
         this.dateFilter = document.getElementById('pickingDateFilter');
         this.printBtn = document.getElementById('printPickingBtn');
+        this.groupByBtn = document.getElementById('groupByBtn');
     }
 
     attachEventListeners() {
@@ -27,6 +28,27 @@ class PickingUI {
         if (this.printBtn) {
             this.printBtn.addEventListener('click', () => this.handlePrint());
         }
+
+        if (this.groupByBtn) {
+            this.groupByBtn.addEventListener('click', () => this.toggleGroupBy());
+        }
+    }
+
+    toggleGroupBy() {
+        const currentMode = this.optimizer.groupBy;
+        const newMode = currentMode === 'product' ? 'distributor' : 'product';
+        this.optimizer.setGroupBy(newMode);
+
+        // Update button text
+        if (this.groupByBtn) {
+            if (newMode === 'distributor') {
+                this.groupByBtn.innerHTML = '📦 Agrupar por Produto';
+            } else {
+                this.groupByBtn.innerHTML = '🚚 Agrupar por Motorista';
+            }
+        }
+
+        this.refresh();
     }
 
     refresh() {
@@ -89,10 +111,16 @@ class PickingUI {
             </div>
         `;
 
-        // Render each zone
-        pickingList.zones.forEach(zoneData => {
-            html += this.renderZone(zoneData);
-        });
+        // Render each zone based on grouping mode
+        if (pickingList.groupBy === 'distributor') {
+            pickingList.zones.forEach(zoneData => {
+                html += this.renderZoneByDistributor(zoneData);
+            });
+        } else {
+            pickingList.zones.forEach(zoneData => {
+                html += this.renderZone(zoneData);
+            });
+        }
 
         this.container.innerHTML = html;
     }
@@ -149,6 +177,85 @@ class PickingUI {
                     <td colspan="3" style="text-align: right;">TOTAL ${product.name}:</td>
                     <td class="quantity-cell">${product.totalQuantity}</td>
                     <td>${product.totalKg.toFixed(1)}</td>
+                </tr>
+            `;
+        });
+
+        html += `
+                    </tbody>
+                </table>
+
+                <div class="zone-totals">
+                    <div>
+                        <strong>Total Zona:</strong> ${zoneData.totalBoxes} caixas
+                    </div>
+                    <div>
+                        <strong>Total Kg:</strong> ${zoneData.totalKg.toFixed(1)} kg
+                    </div>
+                </div>
+            </div>
+        `;
+
+        return html;
+    }
+
+    renderZoneByDistributor(zoneData) {
+        const zone = zoneData.zone;
+
+        let html = `
+            <div class="zone-section">
+                <div class="zone-header ${zone.id}">
+                    <span>${zone.name}</span>
+                    <span>${zoneData.totalBoxes} caixas (${zoneData.totalKg.toFixed(1)} kg)</span>
+                </div>
+
+                <table class="picking-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 20%;">Motorista</th>
+                            <th style="width: 30%;">Produto</th>
+                            <th style="width: 30%;">Restaurante</th>
+                            <th style="width: 10%;" class="quantity-cell">Qtd</th>
+                            <th style="width: 10%;">Kg</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+
+        zoneData.distributors.forEach(dist => {
+            const distRowSpan = dist.products.reduce((sum, p) => sum + p.orders.length, 0);
+
+            dist.products.forEach((product, productIndex) => {
+                product.orders.forEach((order, orderIndex) => {
+                    const isFirstRowOfDist = productIndex === 0 && orderIndex === 0;
+                    const totalKg = (order.quantity * product.kgPerBox).toFixed(1);
+
+                    html += `
+                        <tr>
+                            ${isFirstRowOfDist ? `
+                                <td rowspan="${distRowSpan}" style="font-weight: bold; background: #f8fafc; vertical-align: top; padding-top: 15px;">
+                                    <div style="font-size: 1.1rem;">${dist.distributor}</div>
+                                    <div style="font-size: 0.9rem; color: #64748b; margin-top: 5px;">
+                                        ${dist.totalBoxes} caixas<br>
+                                        ${dist.totalKg.toFixed(1)} kg
+                                    </div>
+                                </td>
+                            ` : ''}
+                            <td>${product.name}</td>
+                            <td>${order.restaurant}</td>
+                            <td class="quantity-cell">${order.quantity}</td>
+                            <td>${totalKg}</td>
+                        </tr>
+                    `;
+                });
+            });
+
+            // Total row for distributor
+            html += `
+                <tr style="background: #f1f5f9; font-weight: bold;">
+                    <td colspan="3" style="text-align: right;">TOTAL ${dist.distributor}:</td>
+                    <td class="quantity-cell">${dist.totalBoxes}</td>
+                    <td>${dist.totalKg.toFixed(1)}</td>
                 </tr>
             `;
         });

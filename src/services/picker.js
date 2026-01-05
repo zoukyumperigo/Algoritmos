@@ -4,7 +4,7 @@
  *
  * Optimization order:
  * 1. Zone (Frozen Seafood → Frozen Meat → Frozen Pre-cooked → Dry Goods)
- * 2. Product (aggregate same products)
+ * 2. Product (aggregate same products) OR Distributor (group by courier)
  * 3. Route (distributor delivery order)
  */
 
@@ -12,6 +12,14 @@ class PickingListOptimizer {
     constructor(zones, distributors) {
         this.zones = zones;
         this.distributors = distributors;
+        this.groupBy = 'product'; // 'product' or 'distributor'
+    }
+
+    /**
+     * Set grouping mode
+     */
+    setGroupBy(mode) {
+        this.groupBy = mode; // 'product' or 'distributor'
     }
 
     /**
@@ -32,12 +40,18 @@ class PickingListOptimizer {
                     totalItems: 0,
                     totalBoxes: 0,
                     totalKg: 0
-                }
+                },
+                groupBy: this.groupBy
             };
         }
 
-        // Aggregate items by zone and product
-        const zoneGroups = this.aggregateByZone(filteredOrders);
+        // Aggregate based on grouping mode
+        let zoneGroups;
+        if (this.groupBy === 'distributor') {
+            zoneGroups = this.aggregateByZoneAndDistributor(filteredOrders);
+        } else {
+            zoneGroups = this.aggregateByZone(filteredOrders);
+        }
 
         // Sort zones by picking priority
         const sortedZones = this.sortZones(zoneGroups);
@@ -48,7 +62,8 @@ class PickingListOptimizer {
         return {
             zones: sortedZones,
             summary: summary,
-            generatedAt: new Date().toISOString()
+            generatedAt: new Date().toISOString(),
+            groupBy: this.groupBy
         };
     }
 
@@ -156,10 +171,67 @@ class PickingListOptimizer {
     }
 
     /**
+     * Aggregate items by zone and distributor (group by distributor first)
+     */
+    aggregateByZoneAndDistributor(orders) {
+        const zoneMap = new Map();
+
+        orders.forEach(order => {
+            order.items.forEach(item => {
+                if (!item.isMapped) return;
+
+                const zone = item.zone;
+
+                if (!zoneMap.has(zone)) {
+                    zoneMap.set(zone, new Map());
+                }
+
+                const distributorMap = zoneMap.get(zone);
+                const distKey = order.distributorName || order.distributorInitial;
+
+                if (!distributorMap.has(distKey)) {
+                    distributorMap.set(distKey, {
+                        distributor: distKey,
+                        distributorInitial: order.distributorInitial,
+                        routePriority: this.getRoutePriority(order.distributorInitial),
+                        products: new Map()
+                    });
+                }
+
+                const dist = distributorMap.get(distKey);
+                const productKey = item.productSKU;
+
+                if (!dist.products.has(productKey)) {
+                    dist.products.set(productKey, {
+                        sku: item.productSKU,
+                        name: item.productName,
+                        zone: zone,
+                        kgPerBox: item.kgPerBox,
+                        orders: []
+                    });
+                }
+
+                const product = dist.products.get(productKey);
+                product.orders.push({
+                    orderId: order.id,
+                    restaurant: order.restaurantName,
+                    quantity: item.quantity
+                });
+            });
+        });
+
+        return zoneMap;
+    }
+
+    /**
      * Sort zones by picking priority
      */
     sortZones(zoneMap) {
         const zones = [];
+
+        if (this.groupBy === 'distributor') {
+            return this.sortZonesByDistributor(zoneMap);
+        }
 
         Array.from(zoneMap.entries()).forEach(([zoneId, productMap]) => {
             const zone = this.zones[zoneId] || {
@@ -198,6 +270,65 @@ class PickingListOptimizer {
             zones.push({
                 zone: zone,
                 products: products,
+                totalBoxes: zoneTotalBoxes,
+                totalKg: zoneTotalKg
+            });
+        });
+
+        // Sort zones by picking priority
+        return zones.sort((a, b) => a.zone.pickingPriority - b.zone.pickingPriority);
+    }
+
+    /**
+     * Sort zones by distributor (for distributor-first grouping)
+     */
+    sortZonesByDistributor(zoneMap) {
+        const zones = [];
+
+        Array.from(zoneMap.entries()).forEach(([zoneId, distributorMap]) => {
+            const zone = this.zones[zoneId] || {
+                id: zoneId,
+                name: zoneId,
+                pickingPriority: 999,
+                color: '#666'
+            };
+
+            // Convert distributors map to array and sort by route priority
+            const distributors = Array.from(distributorMap.values()).map(dist => {
+                // Convert products map to array and sort by name
+                const productsList = Array.from(dist.products.values()).map(product => {
+                    // Calculate totals for this product
+                    const totalQuantity = product.orders.reduce((sum, o) => sum + o.quantity, 0);
+                    const totalKg = totalQuantity * product.kgPerBox;
+
+                    return {
+                        ...product,
+                        totalQuantity: totalQuantity,
+                        totalKg: totalKg
+                    };
+                }).sort((a, b) => a.name.localeCompare(b.name));
+
+                // Calculate distributor totals
+                const distTotalBoxes = productsList.reduce((sum, p) => sum + p.totalQuantity, 0);
+                const distTotalKg = productsList.reduce((sum, p) => sum + p.totalKg, 0);
+
+                return {
+                    distributor: dist.distributor,
+                    distributorInitial: dist.distributorInitial,
+                    routePriority: dist.routePriority,
+                    products: productsList,
+                    totalBoxes: distTotalBoxes,
+                    totalKg: distTotalKg
+                };
+            }).sort((a, b) => a.routePriority - b.routePriority);
+
+            // Calculate zone totals
+            const zoneTotalBoxes = distributors.reduce((sum, d) => sum + d.totalBoxes, 0);
+            const zoneTotalKg = distributors.reduce((sum, d) => sum + d.totalKg, 0);
+
+            zones.push({
+                zone: zone,
+                distributors: distributors,
                 totalBoxes: zoneTotalBoxes,
                 totalKg: zoneTotalKg
             });
