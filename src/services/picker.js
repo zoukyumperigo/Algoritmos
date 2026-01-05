@@ -1,0 +1,363 @@
+/**
+ * Picking List Optimizer
+ * Generates optimized picking lists for warehouse operations
+ *
+ * Optimization order:
+ * 1. Zone (Frozen Seafood → Frozen Meat → Frozen Pre-cooked → Dry Goods)
+ * 2. Product (aggregate same products)
+ * 3. Route (distributor delivery order)
+ */
+
+class PickingListOptimizer {
+    constructor(zones, distributors) {
+        this.zones = zones;
+        this.distributors = distributors;
+    }
+
+    /**
+     * Generate optimized picking list from orders
+     */
+    generatePickingList(orders, filters = {}) {
+        // Filter orders based on criteria
+        let filteredOrders = this.filterOrders(orders, filters);
+
+        // Only include valid orders (no errors)
+        filteredOrders = filteredOrders.filter(order => order.isValid());
+
+        if (filteredOrders.length === 0) {
+            return {
+                zones: [],
+                summary: {
+                    totalOrders: 0,
+                    totalItems: 0,
+                    totalBoxes: 0,
+                    totalKg: 0
+                }
+            };
+        }
+
+        // Aggregate items by zone and product
+        const zoneGroups = this.aggregateByZone(filteredOrders);
+
+        // Sort zones by picking priority
+        const sortedZones = this.sortZones(zoneGroups);
+
+        // Calculate summary
+        const summary = this.calculateSummary(filteredOrders);
+
+        return {
+            zones: sortedZones,
+            summary: summary,
+            generatedAt: new Date().toISOString()
+        };
+    }
+
+    /**
+     * Filter orders based on criteria
+     */
+    filterOrders(orders, filters) {
+        let filtered = [...orders];
+
+        // Filter by date
+        if (filters.date) {
+            filtered = filtered.filter(order => order.getDate() === filters.date);
+        } else if (filters.dateRange) {
+            filtered = filtered.filter(order => {
+                const orderDate = new Date(order.timestamp);
+                return orderDate >= filters.dateRange.from && orderDate <= filters.dateRange.to;
+            });
+        }
+
+        // Filter by status
+        if (filters.status) {
+            filtered = filtered.filter(order => order.status === filters.status);
+        } else {
+            // Default: only pending orders
+            filtered = filtered.filter(order => order.status === 'pending');
+        }
+
+        // Filter by distributor
+        if (filters.distributor) {
+            filtered = filtered.filter(order =>
+                order.distributorInitial === filters.distributor ||
+                order.distributorName === filters.distributor
+            );
+        }
+
+        // Filter by sales rep
+        if (filters.salesRep) {
+            filtered = filtered.filter(order => order.salesRep === filters.salesRep);
+        }
+
+        return filtered;
+    }
+
+    /**
+     * Aggregate items by zone
+     */
+    aggregateByZone(orders) {
+        const zoneMap = new Map();
+
+        orders.forEach(order => {
+            order.items.forEach(item => {
+                if (!item.isMapped) return;
+
+                const zone = item.zone;
+
+                if (!zoneMap.has(zone)) {
+                    zoneMap.set(zone, new Map());
+                }
+
+                const productMap = zoneMap.get(zone);
+                const key = item.productSKU;
+
+                if (!productMap.has(key)) {
+                    productMap.set(key, {
+                        sku: item.productSKU,
+                        name: item.productName,
+                        zone: zone,
+                        kgPerBox: item.kgPerBox,
+                        distributors: new Map()
+                    });
+                }
+
+                const product = productMap.get(key);
+                const distKey = order.distributorName || order.distributorInitial;
+
+                if (!product.distributors.has(distKey)) {
+                    product.distributors.set(distKey, {
+                        distributor: distKey,
+                        distributorInitial: order.distributorInitial,
+                        routePriority: this.getRoutePriority(order.distributorInitial),
+                        orders: []
+                    });
+                }
+
+                const dist = product.distributors.get(distKey);
+                dist.orders.push({
+                    orderId: order.id,
+                    restaurant: order.restaurantName,
+                    quantity: item.quantity
+                });
+            });
+        });
+
+        return zoneMap;
+    }
+
+    /**
+     * Get route priority for distributor
+     */
+    getRoutePriority(distributorInitial) {
+        const distributor = this.distributors.find(d =>
+            d.initial.toUpperCase() === distributorInitial.toUpperCase()
+        );
+        return distributor ? distributor.routePriority : 999;
+    }
+
+    /**
+     * Sort zones by picking priority
+     */
+    sortZones(zoneMap) {
+        const zones = [];
+
+        Array.from(zoneMap.entries()).forEach(([zoneId, productMap]) => {
+            const zone = this.zones[zoneId] || {
+                id: zoneId,
+                name: zoneId,
+                pickingPriority: 999,
+                color: '#666'
+            };
+
+            // Convert products map to array and sort by name
+            const products = Array.from(productMap.values()).map(product => {
+                // Convert distributors map to array and sort by route priority
+                const distributorsList = Array.from(product.distributors.values())
+                    .sort((a, b) => a.routePriority - b.routePriority);
+
+                // Calculate totals
+                const totalQuantity = distributorsList.reduce(
+                    (sum, dist) => sum + dist.orders.reduce((s, o) => s + o.quantity, 0),
+                    0
+                );
+
+                const totalKg = totalQuantity * product.kgPerBox;
+
+                return {
+                    ...product,
+                    distributors: distributorsList,
+                    totalQuantity: totalQuantity,
+                    totalKg: totalKg
+                };
+            }).sort((a, b) => a.name.localeCompare(b.name));
+
+            // Calculate zone totals
+            const zoneTotalBoxes = products.reduce((sum, p) => sum + p.totalQuantity, 0);
+            const zoneTotalKg = products.reduce((sum, p) => sum + p.totalKg, 0);
+
+            zones.push({
+                zone: zone,
+                products: products,
+                totalBoxes: zoneTotalBoxes,
+                totalKg: zoneTotalKg
+            });
+        });
+
+        // Sort zones by picking priority
+        return zones.sort((a, b) => a.zone.pickingPriority - b.zone.pickingPriority);
+    }
+
+    /**
+     * Calculate summary statistics
+     */
+    calculateSummary(orders) {
+        const summary = {
+            totalOrders: orders.length,
+            totalItems: 0,
+            totalBoxes: 0,
+            totalKg: 0,
+            distributors: new Set(),
+            restaurants: new Set()
+        };
+
+        orders.forEach(order => {
+            summary.totalItems += order.items.length;
+            summary.totalBoxes += order.totalBoxes;
+            summary.totalKg += order.totalKg;
+            summary.distributors.add(order.distributorName || order.distributorInitial);
+            summary.restaurants.add(order.restaurantName);
+        });
+
+        summary.distributors = Array.from(summary.distributors);
+        summary.restaurants = Array.from(summary.restaurants);
+
+        return summary;
+    }
+
+    /**
+     * Generate printable picking list (HTML)
+     */
+    generatePrintableHTML(pickingList) {
+        let html = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Picking - ${new Date().toLocaleDateString('pt-PT')}</title>
+    <style>
+        @page { margin: 1cm; }
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 14pt;
+            line-height: 1.4;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .summary {
+            background: #f0f0f0;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        .zone-section {
+            page-break-inside: avoid;
+            margin-bottom: 30px;
+        }
+        .zone-header {
+            padding: 10px;
+            color: white;
+            font-size: 18pt;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+        th {
+            background: #333;
+            color: white;
+            padding: 8px;
+            text-align: left;
+        }
+        td {
+            padding: 8px;
+            border-bottom: 1px solid #ccc;
+        }
+        .quantity {
+            font-size: 16pt;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>📋 LISTA DE PICKING</h1>
+    <div class="summary">
+        <strong>Data:</strong> ${new Date().toLocaleDateString('pt-PT')}<br>
+        <strong>Total Pedidos:</strong> ${pickingList.summary.totalOrders} |
+        <strong>Total Caixas:</strong> ${pickingList.summary.totalBoxes} |
+        <strong>Total Kg:</strong> ${pickingList.summary.totalKg.toFixed(1)}
+    </div>
+`;
+
+        pickingList.zones.forEach(zoneData => {
+            html += `
+    <div class="zone-section">
+        <div class="zone-header" style="background-color: ${zoneData.zone.color};">
+            ${zoneData.zone.name} - ${zoneData.totalBoxes} caixas
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Produto</th>
+                    <th>Distribuidor</th>
+                    <th>Restaurante</th>
+                    <th>Quantidade</th>
+                </tr>
+            </thead>
+            <tbody>
+`;
+
+            zoneData.products.forEach(product => {
+                product.distributors.forEach((dist, distIndex) => {
+                    dist.orders.forEach((order, orderIndex) => {
+                        const isFirstRow = distIndex === 0 && orderIndex === 0;
+                        html += `
+                <tr>
+                    ${isFirstRow ? `<td rowspan="${this.countTotalOrders(product)}">${product.name}</td>` : ''}
+                    <td>${dist.distributor}</td>
+                    <td>${order.restaurant}</td>
+                    <td class="quantity">${order.quantity}</td>
+                </tr>
+`;
+                    });
+                });
+            });
+
+            html += `
+            </tbody>
+        </table>
+    </div>
+`;
+        });
+
+        html += `
+</body>
+</html>
+`;
+
+        return html;
+    }
+
+    /**
+     * Count total orders for a product
+     */
+    countTotalOrders(product) {
+        return product.distributors.reduce(
+            (sum, dist) => sum + dist.orders.length,
+            0
+        );
+    }
+}
