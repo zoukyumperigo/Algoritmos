@@ -1,0 +1,14 @@
+# Order Validation Agent - Requirements
+# Python 3.8+
+
+# Core dependencies (built-in, no installation needed)
+# - dataclasses (Python 3.7+)
+# - decimal
+# - datetime
+# - typing
+# - enum
+
+# Optional dependencies for production
+# requests>=2.31.0  # Para integração com APIs externas (WhatsApp, Sage)
+# python-dotenv>=1.0.0  # Para configuração de ambiente
+# pytest>=7.4.0  # Para testes unitários
