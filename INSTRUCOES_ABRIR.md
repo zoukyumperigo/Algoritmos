@@ -1,5 +1,31 @@
 # 🚀 Como Abrir a Aplicação Corretamente
 
+## ✅ FORMATO CORRETO DE WHATSAPP (ATUALIZADO)
+
+O formato de importação agora é:
+
+```
+J
+Restaurante Marazul
+10 Camarão 41/50
+5 Polvo
+15 Arroz Sushi
+
+M
+Restaurant Golden Dragon
+5 Camarão 26/30
+15 Arroz Sushi
+3 Spring Roll
+```
+
+**Estrutura:**
+- **Linha 1**: Inicial do distribuidor (ex: J, M, JO)
+- **Linha 2**: Nome do restaurante
+- **Linhas 3+**: Quantidade + Espaço + Nome do Produto (um produto por linha)
+- **Linha vazia**: Separa pedidos
+
+---
+
 ## Problema Comum: Perda de Cores e Formatação
 
 Se está a ver a aplicação sem cores ou descentralizada, o problema é provavelmente **cache do navegador** ou abrir o ficheiro HTML diretamente.
