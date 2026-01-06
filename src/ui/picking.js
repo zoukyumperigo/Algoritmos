@@ -223,7 +223,8 @@ class PickingUI {
         `;
 
         zoneData.distributors.forEach(dist => {
-            const distRowSpan = dist.products.reduce((sum, p) => sum + p.orders.length, 0);
+            // Calculate rowspan including product subtotal rows
+            const distRowSpan = dist.products.reduce((sum, p) => sum + p.orders.length + 1, 0); // +1 for subtotal row per product
 
             dist.products.forEach((product, productIndex) => {
                 product.orders.forEach((order, orderIndex) => {
@@ -248,6 +249,19 @@ class PickingUI {
                         </tr>
                     `;
                 });
+
+                // Subtotal row for product
+                const productTotalQty = product.orders.reduce((sum, o) => sum + o.quantity, 0);
+                const productTotalKg = (productTotalQty * product.kgPerBox).toFixed(1);
+
+                html += `
+                    <tr style="background: #e0f2fe; font-weight: 600; border-top: 2px solid #0ea5e9;">
+                        <td style="text-align: right; padding-right: 10px; font-style: italic;">Subtotal ${product.name}:</td>
+                        <td></td>
+                        <td class="quantity-cell" style="color: #0369a1;">${productTotalQty}</td>
+                        <td style="color: #0369a1;">${productTotalKg}</td>
+                    </tr>
+                `;
             });
 
             // Total row for distributor
