@@ -2,15 +2,17 @@
  * WhatsApp Order Parser
  * Parses raw WhatsApp text into structured orders
  *
- * Format (exactly 3 lines per order):
+ * Format:
  * Line 1: Distributor Initial (single letter)
  * Line 2: Restaurant Name
- * Line 3: Quantity(ProductCode)
+ * Lines 3+: Quantity Product (multiple lines, one product per line)
  *
  * Example:
  * J
  * Restaurante Marazul
- * 10(41/50)
+ * 10 Camarão 41/50
+ * 5 Polvo
+ * 15 Arroz Sushi
  */
 
 class WhatsAppParser {
@@ -33,36 +35,39 @@ class WhatsAppParser {
             return [];
         }
 
-        // Split into lines and clean
-        const lines = rawText
-            .split('\n')
-            .map(line => line.trim())
-            .filter(line => line.length > 0); // Remove empty lines
+        // Split into lines (keep empty lines for separation)
+        const lines = rawText.split('\n').map(line => line.trim());
 
         if (lines.length === 0) {
             this.errors.push('Nenhuma linha válida encontrada');
             return [];
         }
 
-        // Parse in groups of 3
+        // Parse orders dynamically
         const orders = [];
-        for (let i = 0; i < lines.length; i += 3) {
-            if (i + 2 >= lines.length) {
-                this.warnings.push(`Linha ${i + 1}: Pedido incompleto (necessita 3 linhas)`);
-                break;
+        let i = 0;
+
+        while (i < lines.length) {
+            // Skip empty lines
+            if (!lines[i] || lines[i].length === 0) {
+                i++;
+                continue;
             }
 
-            const orderData = {
-                lineNumber: i + 1,
-                distributorLine: lines[i],
-                restaurantLine: lines[i + 1],
-                itemsLine: lines[i + 2],
-                rawText: `${lines[i]}\n${lines[i + 1]}\n${lines[i + 2]}`
-            };
-
-            const order = this.parseOrder(orderData);
-            if (order) {
-                orders.push(order);
+            // Check if this looks like a distributor initial
+            if (this.isDistributorInitial(lines[i])) {
+                const orderData = this.extractOrderData(lines, i);
+                if (orderData) {
+                    const order = this.parseOrder(orderData);
+                    if (order) {
+                        orders.push(order);
+                    }
+                    i = orderData.nextLineIndex;
+                } else {
+                    i++;
+                }
+            } else {
+                i++;
             }
         }
 
@@ -70,10 +75,75 @@ class WhatsAppParser {
     }
 
     /**
-     * Parse a single order (3 lines)
+     * Check if a line is a distributor initial
+     */
+    isDistributorInitial(line) {
+        const trimmed = line.trim().toUpperCase();
+        return /^[A-Z]{1,2}$/.test(trimmed);
+    }
+
+    /**
+     * Extract order data from lines starting at index
+     */
+    extractOrderData(lines, startIndex) {
+        if (startIndex + 2 >= lines.length) {
+            this.warnings.push(`Linha ${startIndex + 1}: Pedido incompleto`);
+            return null;
+        }
+
+        const distributorLine = lines[startIndex];
+        const restaurantLine = lines[startIndex + 1];
+
+        // Collect item lines (until empty line or next distributor)
+        const itemLines = [];
+        let i = startIndex + 2;
+
+        while (i < lines.length) {
+            const line = lines[i];
+
+            // Stop at empty line
+            if (!line || line.length === 0) {
+                i++;
+                break;
+            }
+
+            // Stop at next distributor initial
+            if (this.isDistributorInitial(line)) {
+                break;
+            }
+
+            // Check if it's a product line (starts with number)
+            if (/^\d+\s/.test(line)) {
+                itemLines.push(line);
+                i++;
+            } else {
+                i++;
+                break;
+            }
+        }
+
+        if (itemLines.length === 0) {
+            this.warnings.push(`Linha ${startIndex + 1}: Nenhum produto encontrado`);
+            return null;
+        }
+
+        const rawLines = [distributorLine, restaurantLine, ...itemLines];
+
+        return {
+            lineNumber: startIndex + 1,
+            distributorLine,
+            restaurantLine,
+            itemLines,
+            rawText: rawLines.join('\n'),
+            nextLineIndex: i
+        };
+    }
+
+    /**
+     * Parse a single order
      */
     parseOrder(orderData) {
-        const { lineNumber, distributorLine, restaurantLine, itemsLine, rawText } = orderData;
+        const { lineNumber, distributorLine, restaurantLine, itemLines, rawText } = orderData;
 
         // Parse distributor initial
         const distributorInitial = this.parseDistributorInitial(distributorLine);
@@ -89,10 +159,19 @@ class WhatsAppParser {
             return null;
         }
 
-        // Parse items (can be multiple items in one line)
-        const items = this.parseItems(itemsLine);
+        // Parse all item lines
+        const items = [];
+        itemLines.forEach((itemLine, index) => {
+            const item = this.parseItemLine(itemLine);
+            if (item) {
+                items.push(item);
+            } else {
+                this.warnings.push(`Linha ${lineNumber + 2 + index}: Item inválido "${itemLine}"`);
+            }
+        });
+
         if (items.length === 0) {
-            this.errors.push(`Linha ${lineNumber + 2}: Nenhum item válido encontrado em "${itemsLine}"`);
+            this.errors.push(`Linha ${lineNumber}: Nenhum item válido encontrado`);
             return null;
         }
 
@@ -154,34 +233,32 @@ class WhatsAppParser {
     }
 
     /**
-     * Parse items line
-     * Format: Quantity(ProductCode) or multiple: 10(41/50) 5(26/30)
+     * Parse single item line
+     * Format: Quantity ProductName (e.g., "4 Camarão 41/50")
      */
-    parseItems(line) {
-        const items = [];
+    parseItemLine(line) {
+        // Regex: starts with number, whitespace, then product name
+        const match = line.match(/^\s*(\d+)\s+(.+)$/);
 
-        // Regex to match: number(text)
-        // Matches: 10(41/50), 5(Arroz Sushi), etc.
-        const itemPattern = /(\d+)\s*\(([^)]+)\)/g;
-
-        let match;
-        while ((match = itemPattern.exec(line)) !== null) {
-            const quantity = parseInt(match[1], 10);
-            const productCode = match[2].trim();
-
-            if (quantity > 0 && productCode.length > 0) {
-                items.push(new OrderItem({
-                    productCode: productCode,
-                    productSKU: '', // Will be filled by normalizer
-                    productName: '', // Will be filled by normalizer
-                    quantity: quantity,
-                    zone: '', // Will be filled by normalizer
-                    isMapped: false
-                }));
-            }
+        if (!match) {
+            return null;
         }
 
-        return items;
+        const quantity = parseInt(match[1], 10);
+        const productName = match[2].trim();
+
+        if (quantity <= 0 || productName.length === 0) {
+            return null;
+        }
+
+        return new OrderItem({
+            productCode: productName, // Use full name as code initially
+            productSKU: '', // Will be filled by normalizer
+            productName: '', // Will be filled by normalizer
+            quantity: quantity,
+            zone: '', // Will be filled by normalizer
+            isMapped: false
+        });
     }
 
     /**

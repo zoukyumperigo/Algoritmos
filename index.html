@@ -38,7 +38,7 @@
                     <h2>Importar Pedidos WhatsApp</h2>
                     <p class="help-text">
                         Cole o texto do WhatsApp ou carregue um ficheiro .txt<br>
-                        <strong>Formato:</strong> Linha 1: Inicial Distribuidor | Linha 2: Nome Restaurante | Linha 3: Quantidade(CódigoProduto)
+                        <strong>Formato:</strong> Linha 1: Inicial Distribuidor | Linha 2: Nome Restaurante | Linhas 3+: Quantidade NomeProduto (um produto por linha)
                     </p>
                 </div>
 
@@ -49,12 +49,15 @@
                             <textarea id="whatsappText" placeholder="Exemplo:
 J
 Restaurante Marazul
-10(41/50)
+10 Camarão 41/50
+5 Polvo
+15 Arroz Sushi
 
 M
 Restaurant Golden Dragon
-5(26/30)
-15(Arroz Sushi)"
+5 Camarão 26/30
+15 Arroz Sushi
+3 Spring Roll"
                                 rows="15"></textarea>
                             <button id="parseBtn" class="btn-primary">🔍 Processar Pedidos</button>
                         </div>
