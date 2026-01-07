@@ -99,6 +99,7 @@ function initializeApp() {
         window.pickingUI = App.pickingUI;
         window.forecastUI = App.forecastUI;
         window.stockUI = App.stockUI;
+        window.settingsUI = App.settingsUI;
 
         // Initialize navigation
         initializeNavigation();
