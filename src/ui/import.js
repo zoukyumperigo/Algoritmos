@@ -79,10 +79,23 @@ class ImportUI {
 
     readFile(file) {
         return new Promise((resolve, reject) => {
+            // Validate file size before reading
+            const constants = window.APP_CONSTANTS || { MAX_FILE_SIZE_BYTES: 10 * 1024 * 1024 };
+            const maxSize = constants.MAX_FILE_SIZE_BYTES;
+
+            if (file.size > maxSize) {
+                const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                const maxMB = (maxSize / (1024 * 1024)).toFixed(0);
+                reject(new Error(`Ficheiro muito grande! Tamanho: ${sizeMB}MB, Máximo: ${maxMB}MB`));
+                return;
+            }
+
             const reader = new FileReader();
             reader.onload = (e) => resolve(e.target.result);
             reader.onerror = (e) => reject(new Error('Erro ao ler ficheiro'));
-            reader.readAsText(file);
+
+            // Explicitly specify UTF-8 encoding for Portuguese characters
+            reader.readAsText(file, 'UTF-8');
         });
     }
 

@@ -6,10 +6,21 @@
 
 class OrderValidator {
     constructor(config = {}) {
+        // Use constants for configuration with fallbacks for testing
+        const constants = window.APP_CONSTANTS || {
+            MAX_QUANTITY_THRESHOLD: 300,
+            DUPLICATE_CHECK_WINDOW_MS: 24 * 60 * 60 * 1000,
+            MIN_ORDER_QUANTITY: 1,
+            MAX_ORDER_QUANTITY: 10000,
+            MAX_TOTAL_BOXES_WARNING: 600
+        };
+
         this.config = {
-            maxQuantityThreshold: config.maxQuantityThreshold || 300,
-            duplicateCheckWindow: config.duplicateCheckWindow || 24 * 60 * 60 * 1000, // 24 hours
-            minQuantity: config.minQuantity || 1,
+            maxQuantityThreshold: config.maxQuantityThreshold || constants.MAX_QUANTITY_THRESHOLD,
+            duplicateCheckWindow: config.duplicateCheckWindow || constants.DUPLICATE_CHECK_WINDOW_MS,
+            minQuantity: config.minQuantity || constants.MIN_ORDER_QUANTITY,
+            maxQuantity: config.maxQuantity || constants.MAX_ORDER_QUANTITY,
+            maxTotalBoxes: config.maxTotalBoxes || constants.MAX_TOTAL_BOXES_WARNING,
             ...config
         };
     }
@@ -76,9 +87,18 @@ class OrderValidator {
 
     /**
      * Validate quantities for abnormal values
+     * ENHANCED: Added maximum quantity limit and better validation
      */
     validateQuantities(order) {
         order.items.forEach(item => {
+            // Check if quantity is a valid number
+            if (!Number.isFinite(item.quantity)) {
+                order.addError(
+                    `Quantidade inválida: ${item.productName} - valor não numérico`
+                );
+                return;
+            }
+
             // Check minimum
             if (item.quantity < this.config.minQuantity) {
                 order.addError(
@@ -86,16 +106,23 @@ class OrderValidator {
                 );
             }
 
-            // Check maximum (abnormally high)
-            if (item.quantity > this.config.maxQuantityThreshold) {
+            // Check absolute maximum (security limit)
+            if (item.quantity > this.config.maxQuantity) {
+                order.addError(
+                    `❌ QUANTIDADE EXCEDE MÁXIMO: ${item.productName} - ${item.quantity} caixas (máximo: ${this.config.maxQuantity})`
+                );
+            }
+
+            // Check warning threshold (abnormally high but not blocking)
+            if (item.quantity > this.config.maxQuantityThreshold && item.quantity <= this.config.maxQuantity) {
                 order.addWarning(
                     `⚠️ QUANTIDADE ANORMALMENTE ALTA: ${item.productName} - ${item.quantity} caixas (> ${this.config.maxQuantityThreshold})`
                 );
             }
         });
 
-        // Check total boxes
-        if (order.totalBoxes > this.config.maxQuantityThreshold * 2) {
+        // Check total boxes with new config value
+        if (order.totalBoxes > this.config.maxTotalBoxes) {
             order.addWarning(
                 `⚠️ TOTAL DE CAIXAS MUITO ALTO: ${order.totalBoxes} caixas no pedido`
             );
@@ -148,12 +175,17 @@ class OrderValidator {
 
     /**
      * Cross-validate multiple orders (check total demand vs stock)
+     * OPTIMIZED: O(n) instead of O(n²) - uses Map for efficient lookups
      */
     validateCrossOrders(orders) {
-        // Aggregate demand by product
+        // Aggregate demand by product - O(n) single pass
         const demandByProduct = new Map();
+        const orderMap = new Map(); // For efficient order lookups
 
+        // First pass: Build demand map and order index - O(n)
         orders.forEach(order => {
+            orderMap.set(order.id, order);
+
             order.items.forEach(item => {
                 if (!item.isMapped) return;
 
@@ -162,36 +194,34 @@ class OrderValidator {
                     productName: item.productName,
                     totalDemand: 0,
                     stockAvailable: item.stockAvailable,
-                    orders: []
+                    orderIds: []  // Store IDs instead of full objects
                 };
 
                 current.totalDemand += item.quantity;
-                current.orders.push({
-                    orderId: order.id,
-                    restaurant: order.restaurantName,
-                    quantity: item.quantity
-                });
+                current.orderIds.push(order.id);
 
                 demandByProduct.set(sku, current);
             });
         });
 
-        // Check if total demand exceeds stock
+        // Second pass: Check stock and add warnings - O(m) where m = unique products
         demandByProduct.forEach((demand, sku) => {
             if (demand.totalDemand > demand.stockAvailable) {
                 const shortage = demand.totalDemand - demand.stockAvailable;
+                const warningMessage = `⚠️ STOCK TOTAL INSUFICIENTE: ${demand.productName} - Total pedido: ${demand.totalDemand}, Stock: ${demand.stockAvailable}, Falta: ${shortage} caixas`;
 
-                // Add warning to all affected orders
-                demand.orders.forEach(orderInfo => {
-                    const order = orders.find(o => o.id === orderInfo.orderId);
+                // Add warning to each affected order - O(k) where k = orders for this product
+                demand.orderIds.forEach(orderId => {
+                    const order = orderMap.get(orderId);
                     if (order && !order.warnings.some(w => w.includes(demand.productName))) {
-                        order.addWarning(
-                            `⚠️ STOCK TOTAL INSUFICIENTE: ${demand.productName} - Total pedido: ${demand.totalDemand}, Stock: ${demand.stockAvailable}, Falta: ${shortage} caixas`
-                        );
+                        order.addWarning(warningMessage);
                     }
                 });
             }
         });
+
+        // Total complexity: O(n) + O(m*k) where k is typically small
+        // Much better than original O(n²)
     }
 
     /**

@@ -38,9 +38,25 @@ class Order {
 
     /**
      * Generate unique order ID
+     * SECURITY: Uses cryptographically secure random values
      */
     generateId() {
-        return `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        const timestamp = Date.now();
+
+        // Use crypto.getRandomValues for secure random generation
+        const array = new Uint8Array(8);
+        if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+            crypto.getRandomValues(array);
+        } else {
+            // Fallback for testing environments without crypto
+            for (let i = 0; i < array.length; i++) {
+                array[i] = Math.floor(Math.random() * 256);
+            }
+        }
+
+        const randomHex = Array.from(array, b => b.toString(16).padStart(2, '0')).join('');
+
+        return `ORD-${timestamp}-${randomHex}`;
     }
 
     /**

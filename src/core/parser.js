@@ -235,6 +235,7 @@ class WhatsAppParser {
     /**
      * Parse single item line
      * Format: Quantity ProductName (e.g., "4 Camarão 41/50")
+     * ENHANCED: Added validation for quantity limits and number safety
      */
     parseItemLine(line) {
         // Regex: starts with number, whitespace, then product name
@@ -247,7 +248,25 @@ class WhatsAppParser {
         const quantity = parseInt(match[1], 10);
         const productName = match[2].trim();
 
-        if (quantity <= 0 || productName.length === 0) {
+        // Get constants with fallback for testing
+        const constants = window.APP_CONSTANTS || {
+            MIN_ORDER_QUANTITY: 1,
+            MAX_ORDER_QUANTITY: 10000
+        };
+
+        // Validate quantity is within safe bounds
+        if (!Number.isFinite(quantity) ||
+            quantity < constants.MIN_ORDER_QUANTITY ||
+            quantity > constants.MAX_ORDER_QUANTITY) {
+            this.warnings.push(
+                `Quantidade fora dos limites: ${quantity} (deve estar entre ${constants.MIN_ORDER_QUANTITY} e ${constants.MAX_ORDER_QUANTITY})`
+            );
+            return null;
+        }
+
+        // Validate product name
+        if (productName.length === 0) {
+            this.warnings.push(`Nome de produto vazio na linha: "${line}"`);
             return null;
         }
 
