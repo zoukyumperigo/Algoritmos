@@ -1,6 +1,6 @@
 /**
  * Route Management UI Module
- * Allows viewing and manually reassigning orders to different couriers
+ * Full CRUD for orders - Add, Edit, Delete, and Reassign routes
  */
 
 class RouteUI {
@@ -38,20 +38,30 @@ class RouteUI {
     }
 
     displayRoutes(orders, distributors) {
+        let html = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0;">📊 Gestão de Rotas</h3>
+                <button onclick="routeUI.showAddOrderForm()" class="btn-success">➕ Adicionar Pedido</button>
+            </div>
+
+            <div id="orderFormContainer"></div>
+        `;
+
         if (orders.length === 0) {
-            this.container.innerHTML = `
-                <div style="text-align: center; padding: 40px; color: #64748b;">
+            html += `
+                <div style="text-align: center; padding: 40px; color: #64748b; background: white; border-radius: 8px;">
                     <h3>Nenhum pedido pendente</h3>
-                    <p>Importe novos pedidos para gerir rotas.</p>
+                    <p>Importe novos pedidos via WhatsApp ou clique em "Adicionar Pedido" acima.</p>
                 </div>
             `;
+            this.container.innerHTML = html;
             return;
         }
 
         // Group orders by courier
         const ordersByCourier = this.groupByCourier(orders);
 
-        let html = `
+        html += `
             <div style="margin-bottom: 20px; padding: 20px; background: #f1f5f9; border-radius: 8px;">
                 <h3 style="margin-top: 0;">📊 Resumo de Rotas</h3>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
@@ -73,9 +83,6 @@ class RouteUI {
         });
 
         this.container.innerHTML = html;
-
-        // Attach event listeners for reassignment buttons
-        this.attachReassignListeners();
     }
 
     groupByCourier(orders) {
@@ -141,7 +148,7 @@ class RouteUI {
                                 <th style="padding: 12px; text-align: left; border-bottom: 2px solid #e2e8f0;">Produtos</th>
                                 <th style="padding: 12px; text-align: center; border-bottom: 2px solid #e2e8f0;">Caixas</th>
                                 <th style="padding: 12px; text-align: center; border-bottom: 2px solid #e2e8f0;">Kg</th>
-                                <th style="padding: 12px; text-align: center; border-bottom: 2px solid #e2e8f0;">Ação</th>
+                                <th style="padding: 12px; text-align: center; border-bottom: 2px solid #e2e8f0; width: 200px;">Ações</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -168,10 +175,19 @@ class RouteUI {
                     </td>
                     <td style="padding: 12px; text-align: center;">
                         <button
-                            class="btn-reassign"
-                            data-order-id="${order.id}"
-                            style="padding: 6px 12px; font-size: 0.9rem; background: #f59e0b; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                            🔄 Mudar Rota
+                            onclick="routeUI.editOrder('${order.id}')"
+                            style="padding: 6px 12px; font-size: 0.85rem; background: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px;">
+                            ✏️ Editar
+                        </button>
+                        <button
+                            onclick="routeUI.handleReassign('${order.id}')"
+                            style="padding: 6px 12px; font-size: 0.85rem; background: #f59e0b; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px;">
+                            🔄 Rota
+                        </button>
+                        <button
+                            onclick="routeUI.deleteOrder('${order.id}')"
+                            style="padding: 6px 12px; font-size: 0.85rem; background: #dc2626; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            🗑️
                         </button>
                     </td>
                 </tr>
@@ -188,15 +204,298 @@ class RouteUI {
         return html;
     }
 
-    attachReassignListeners() {
-        const buttons = document.querySelectorAll('.btn-reassign');
-        buttons.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const orderId = e.target.dataset.orderId;
-                this.handleReassign(orderId);
-            });
+    // =============================================
+    // ADD ORDER
+    // =============================================
+
+    showAddOrderForm() {
+        const distributors = this.storage.loadDistributors();
+        const products = this.storage.loadProducts();
+
+        const formHTML = `
+            <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 2px solid #16a34a;">
+                <h4 style="margin-top: 0;">➕ Adicionar Novo Pedido</h4>
+                <form id="addOrderForm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Distribuidor *</label>
+                        <select id="orderDistributor" style="width: 100%; padding: 8px; border: 2px solid #cbd5e1; border-radius: 4px;" required>
+                            <option value="">Selecione...</option>
+                            ${distributors.map(d => `<option value="${d.initial}">${d.name} (${d.initial})</option>`).join('')}
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Nome do Restaurante *</label>
+                        <input type="text" id="orderRestaurant" placeholder="Ex: Restaurante Marazul"
+                               style="width: 100%; padding: 8px; border: 2px solid #cbd5e1; border-radius: 4px;" required>
+                    </div>
+                    <div style="grid-column: 1 / -1;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Produtos *</label>
+                        <div id="orderProductsList"></div>
+                        <button type="button" onclick="routeUI.addProductRow()"
+                                style="margin-top: 10px; padding: 6px 12px; background: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            + Adicionar Produto
+                        </button>
+                    </div>
+                    <div style="grid-column: 1 / -1; display: flex; gap: 10px; justify-content: flex-end;">
+                        <button type="button" onclick="routeUI.cancelOrderForm()"
+                                style="padding: 10px 20px; background: #64748b; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                            ❌ Cancelar
+                        </button>
+                        <button type="submit"
+                                style="padding: 10px 20px; background: #16a34a; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                            ✅ Adicionar Pedido
+                        </button>
+                    </div>
+                </form>
+            </div>
+        `;
+
+        document.getElementById('orderFormContainer').innerHTML = formHTML;
+
+        // Add initial product row
+        this.addProductRow();
+
+        document.getElementById('addOrderForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.saveNewOrder();
         });
     }
+
+    addProductRow() {
+        const products = this.storage.loadProducts();
+        const container = document.getElementById('orderProductsList');
+        const rowIndex = container.children.length;
+
+        const row = document.createElement('div');
+        row.style.display = 'flex';
+        row.style.gap = '10px';
+        row.style.marginBottom = '10px';
+        row.style.alignItems = 'center';
+        row.innerHTML = `
+            <select class="product-select" style="flex: 2; padding: 8px; border: 2px solid #cbd5e1; border-radius: 4px;" required>
+                <option value="">Selecione produto...</option>
+                ${products.map(p => `<option value="${p.sku}">${p.name}</option>`).join('')}
+            </select>
+            <input type="number" class="product-quantity" placeholder="Qtd" min="1" value="1"
+                   style="width: 80px; padding: 8px; border: 2px solid #cbd5e1; border-radius: 4px;" required>
+            <button type="button" onclick="this.parentElement.remove()"
+                    style="padding: 6px 12px; background: #dc2626; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                🗑️
+            </button>
+        `;
+
+        container.appendChild(row);
+    }
+
+    saveNewOrder() {
+        const distributorInitial = document.getElementById('orderDistributor').value;
+        const restaurantName = document.getElementById('orderRestaurant').value.trim();
+
+        const productSelects = document.querySelectorAll('.product-select');
+        const productQuantities = document.querySelectorAll('.product-quantity');
+
+        const items = [];
+        productSelects.forEach((select, index) => {
+            if (select.value) {
+                const product = this.storage.loadProducts().find(p => p.sku === select.value);
+                items.push(new OrderItem({
+                    productCode: product.name,
+                    productSKU: product.sku,
+                    productName: product.name,
+                    quantity: parseInt(productQuantities[index].value),
+                    zone: product.zone,
+                    kgPerBox: product.kgPerBox,
+                    isMapped: true
+                }));
+            }
+        });
+
+        if (!distributorInitial || !restaurantName || items.length === 0) {
+            alert('Por favor preencha todos os campos obrigatórios!');
+            return;
+        }
+
+        const distributor = this.storage.loadDistributors().find(d => d.initial === distributorInitial);
+
+        const order = new Order({
+            distributorInitial,
+            distributorName: distributor ? distributor.name : '',
+            restaurantName,
+            items,
+            rawText: `Pedido manual: ${restaurantName}`
+        });
+
+        const orders = this.storage.loadOrders();
+        orders.push(order);
+        this.storage.saveOrders(orders);
+
+        alert('✅ Pedido adicionado com sucesso!');
+        this.cancelOrderForm();
+        this.refresh();
+
+        if (window.pickingUI) {
+            window.pickingUI.refresh();
+        }
+    }
+
+    // =============================================
+    // EDIT ORDER
+    // =============================================
+
+    editOrder(orderId) {
+        const orders = this.storage.loadOrders();
+        const order = orders.find(o => o.id === orderId);
+        const distributors = this.storage.loadDistributors();
+        const products = this.storage.loadProducts();
+
+        if (!order) return;
+
+        const formHTML = `
+            <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 2px solid #2563eb;">
+                <h4 style="margin-top: 0;">✏️ Editar Pedido</h4>
+                <form id="editOrderForm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <input type="hidden" id="editOrderId" value="${orderId}">
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Distribuidor *</label>
+                        <select id="orderDistributor" style="width: 100%; padding: 8px; border: 2px solid #cbd5e1; border-radius: 4px;" required>
+                            ${distributors.map(d => `<option value="${d.initial}" ${order.distributorInitial === d.initial ? 'selected' : ''}>${d.name} (${d.initial})</option>`).join('')}
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Nome do Restaurante *</label>
+                        <input type="text" id="orderRestaurant" value="${order.restaurantName}"
+                               style="width: 100%; padding: 8px; border: 2px solid #cbd5e1; border-radius: 4px;" required>
+                    </div>
+                    <div style="grid-column: 1 / -1;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Produtos *</label>
+                        <div id="orderProductsList">
+                            ${order.items.map(item => `
+                                <div style="display: flex; gap: 10px; margin-bottom: 10px; align-items: center;">
+                                    <select class="product-select" style="flex: 2; padding: 8px; border: 2px solid #cbd5e1; border-radius: 4px;" required>
+                                        ${products.map(p => `<option value="${p.sku}" ${item.productSKU === p.sku ? 'selected' : ''}>${p.name}</option>`).join('')}
+                                    </select>
+                                    <input type="number" class="product-quantity" value="${item.quantity}" min="1"
+                                           style="width: 80px; padding: 8px; border: 2px solid #cbd5e1; border-radius: 4px;" required>
+                                    <button type="button" onclick="this.parentElement.remove()"
+                                            style="padding: 6px 12px; background: #dc2626; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                        🗑️
+                                    </button>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <button type="button" onclick="routeUI.addProductRow()"
+                                style="margin-top: 10px; padding: 6px 12px; background: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            + Adicionar Produto
+                        </button>
+                    </div>
+                    <div style="grid-column: 1 / -1; display: flex; gap: 10px; justify-content: flex-end;">
+                        <button type="button" onclick="routeUI.cancelOrderForm()"
+                                style="padding: 10px 20px; background: #64748b; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                            ❌ Cancelar
+                        </button>
+                        <button type="submit"
+                                style="padding: 10px 20px; background: #16a34a; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                            ✅ Guardar Alterações
+                        </button>
+                    </div>
+                </form>
+            </div>
+        `;
+
+        document.getElementById('orderFormContainer').innerHTML = formHTML;
+        document.getElementById('orderFormContainer').scrollIntoView({ behavior: 'smooth' });
+
+        document.getElementById('editOrderForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.saveEditedOrder();
+        });
+    }
+
+    saveEditedOrder() {
+        const orderId = document.getElementById('editOrderId').value;
+        const distributorInitial = document.getElementById('orderDistributor').value;
+        const restaurantName = document.getElementById('orderRestaurant').value.trim();
+
+        const productSelects = document.querySelectorAll('.product-select');
+        const productQuantities = document.querySelectorAll('.product-quantity');
+
+        const items = [];
+        productSelects.forEach((select, index) => {
+            if (select.value) {
+                const product = this.storage.loadProducts().find(p => p.sku === select.value);
+                items.push(new OrderItem({
+                    productCode: product.name,
+                    productSKU: product.sku,
+                    productName: product.name,
+                    quantity: parseInt(productQuantities[index].value),
+                    zone: product.zone,
+                    kgPerBox: product.kgPerBox,
+                    isMapped: true
+                }));
+            }
+        });
+
+        if (!distributorInitial || !restaurantName || items.length === 0) {
+            alert('Por favor preencha todos os campos obrigatórios!');
+            return;
+        }
+
+        const orders = this.storage.loadOrders();
+        const orderIndex = orders.findIndex(o => o.id === orderId);
+
+        if (orderIndex === -1) {
+            alert('Pedido não encontrado!');
+            return;
+        }
+
+        const distributor = this.storage.loadDistributors().find(d => d.initial === distributorInitial);
+
+        // Update order
+        orders[orderIndex].distributorInitial = distributorInitial;
+        orders[orderIndex].distributorName = distributor ? distributor.name : '';
+        orders[orderIndex].restaurantName = restaurantName;
+        orders[orderIndex].items = items;
+        orders[orderIndex].recalculateTotals();
+
+        this.storage.saveOrders(orders);
+
+        alert('✅ Pedido atualizado com sucesso!');
+        this.cancelOrderForm();
+        this.refresh();
+
+        if (window.pickingUI) {
+            window.pickingUI.refresh();
+        }
+    }
+
+    // =============================================
+    // DELETE ORDER
+    // =============================================
+
+    deleteOrder(orderId) {
+        const orders = this.storage.loadOrders();
+        const order = orders.find(o => o.id === orderId);
+
+        if (!order) return;
+
+        if (!confirm(`Tem a certeza que deseja apagar este pedido?\n\n${order.restaurantName}\n${order.totalBoxes} caixas`)) {
+            return;
+        }
+
+        const filtered = orders.filter(o => o.id !== orderId);
+        this.storage.saveOrders(filtered);
+
+        alert('✅ Pedido apagado com sucesso!');
+        this.refresh();
+
+        if (window.pickingUI) {
+            window.pickingUI.refresh();
+        }
+    }
+
+    // =============================================
+    // REASSIGN ROUTE
+    // =============================================
 
     handleReassign(orderId) {
         const orders = this.storage.loadOrders();
@@ -260,5 +559,9 @@ class RouteUI {
         if (window.pickingUI) {
             window.pickingUI.refresh();
         }
+    }
+
+    cancelOrderForm() {
+        document.getElementById('orderFormContainer').innerHTML = '';
     }
 }
