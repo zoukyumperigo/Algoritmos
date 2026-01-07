@@ -359,13 +359,14 @@ class SettingsUI {
         const formHTML = `
             <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 2px solid #2563eb;">
                 <h4 style="margin-top: 0;">${isEdit ? '✏️ Editar Distribuidor' : '➕ Adicionar Novo Distribuidor'}</h4>
+                ${isEdit ? '<p style="color: #ea580c; font-weight: 600; margin-bottom: 10px;">⚠️ Cuidado: Alterar a inicial pode afetar pedidos existentes!</p>' : ''}
                 <form id="distributorForm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                     <div>
                         <label style="display: block; margin-bottom: 5px; font-weight: 600;">Inicial *</label>
                         <input type="text" id="distInitial" value="${distributor?.initial || ''}"
-                               ${isEdit ? 'readonly' : ''}
+                               data-original-initial="${distributor?.initial || ''}"
                                placeholder="Ex: J ou JO" maxlength="2"
-                               style="width: 100%; padding: 8px; border: 2px solid #cbd5e1; border-radius: 4px; text-transform: uppercase; ${isEdit ? 'background: #e2e8f0;' : ''}" required>
+                               style="width: 100%; padding: 8px; border: 2px solid #cbd5e1; border-radius: 4px; text-transform: uppercase;" required>
                     </div>
                     <div>
                         <label style="display: block; margin-bottom: 5px; font-weight: 600;">Nome Completo *</label>
@@ -420,6 +421,7 @@ class SettingsUI {
 
     saveDistributor(isEdit) {
         const initial = document.getElementById('distInitial').value.trim().toUpperCase();
+        const originalInitial = document.getElementById('distInitial').dataset.originalInitial;
         const name = document.getElementById('distName').value.trim();
         const routeNumber = parseInt(document.getElementById('distRouteNumber').value);
         const routePriority = parseInt(document.getElementById('distRoutePriority').value);
@@ -436,6 +438,20 @@ class SettingsUI {
 
         const distributors = this.storage.loadDistributors();
 
+        // Check if initial changed and if new initial already exists
+        if (isEdit && initial !== originalInitial) {
+            if (distributors.find(d => d.initial === initial)) {
+                alert('Já existe um distribuidor com esta inicial!');
+                return;
+            }
+
+            // Confirm change
+            if (!confirm(`Tem a certeza que deseja mudar a inicial de "${originalInitial}" para "${initial}"?\n\nIsto pode afetar pedidos existentes associados ao distribuidor "${originalInitial}".`)) {
+                return;
+            }
+        }
+
+        // Check for duplicates on new distributor
         if (!isEdit && distributors.find(d => d.initial === initial)) {
             alert('Já existe um distribuidor com esta inicial!');
             return;
@@ -451,13 +467,31 @@ class SettingsUI {
         };
 
         if (isEdit) {
-            const index = distributors.findIndex(d => d.initial === initial);
-            distributors[index] = new Distributor(distributorData);
+            // If initial changed, remove old and add new
+            if (initial !== originalInitial) {
+                const filtered = distributors.filter(d => d.initial !== originalInitial);
+                filtered.push(new Distributor(distributorData));
+                this.storage.saveDistributors(filtered);
+
+                // Update orders with old initial
+                const orders = this.storage.loadOrders();
+                orders.forEach(order => {
+                    if (order.distributorInitial === originalInitial) {
+                        order.distributorInitial = initial;
+                    }
+                });
+                this.storage.saveOrders(orders);
+            } else {
+                // Just update in place
+                const index = distributors.findIndex(d => d.initial === initial);
+                distributors[index] = new Distributor(distributorData);
+                this.storage.saveDistributors(distributors);
+            }
         } else {
             distributors.push(new Distributor(distributorData));
+            this.storage.saveDistributors(distributors);
         }
 
-        this.storage.saveDistributors(distributors);
         this.displayDistributors();
         alert(isEdit ? 'Distribuidor atualizado com sucesso!' : 'Distribuidor adicionado com sucesso!');
     }
