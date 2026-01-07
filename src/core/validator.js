@@ -48,6 +48,8 @@ class OrderValidator {
 
     /**
      * Validate stock availability
+     * NOTE: Stock issues are now WARNINGS only, not blocking errors
+     * Orders can be collected even without stock
      */
     validateStock(order) {
         order.items.forEach(item => {
@@ -60,7 +62,7 @@ class OrderValidator {
 
             if (shortage > 0) {
                 if (item.stockAvailable === 0) {
-                    order.addError(
+                    order.addWarning(
                         `⚠️ STOCK ESGOTADO: ${item.productName} - Pedido: ${item.quantity}, Stock: 0`
                     );
                 } else {

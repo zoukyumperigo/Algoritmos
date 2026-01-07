@@ -830,16 +830,7 @@ class SettingsUI {
     // =============================================
 
     displayCustomers() {
-        // Load or initialize customers list
-        let customers = [];
-        try {
-            const stored = localStorage.getItem('wms_customers');
-            if (stored) {
-                customers = JSON.parse(stored);
-            }
-        } catch (e) {
-            console.error('Error loading customers:', e);
-        }
+        const customers = this.storage.loadCustomers();
 
         let html = `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -1028,16 +1019,7 @@ class SettingsUI {
                 return;
             }
 
-            let customers = [];
-            try {
-                const stored = localStorage.getItem('wms_customers');
-                if (stored) {
-                    customers = JSON.parse(stored);
-                }
-            } catch (e) {
-                customers = [];
-            }
-
+            const customers = this.storage.loadCustomers();
             let imported = 0;
             let errors = [];
 
@@ -1061,7 +1043,7 @@ class SettingsUI {
                 imported++;
             }
 
-            localStorage.setItem('wms_customers', JSON.stringify(customers));
+            this.storage.saveCustomers(customers);
 
             let message = `✅ Importação concluída!\n\n${imported} clientes importados`;
             if (errors.length > 0) {
@@ -1078,16 +1060,7 @@ class SettingsUI {
     }
 
     showCustomerForm(customerIndex = null) {
-        let customers = [];
-        try {
-            const stored = localStorage.getItem('wms_customers');
-            if (stored) {
-                customers = JSON.parse(stored);
-            }
-        } catch (e) {
-            customers = [];
-        }
-
+        const customers = this.storage.loadCustomers();
         const customer = customerIndex !== null ? customers[customerIndex] : null;
         const isEdit = customer !== null;
 
@@ -1155,16 +1128,7 @@ class SettingsUI {
             return;
         }
 
-        let customers = [];
-        try {
-            const stored = localStorage.getItem('wms_customers');
-            if (stored) {
-                customers = JSON.parse(stored);
-            }
-        } catch (e) {
-            customers = [];
-        }
-
+        const customers = this.storage.loadCustomers();
         const customerData = { name, zone, contact, address };
 
         if (customerIndex !== null) {
@@ -1173,7 +1137,7 @@ class SettingsUI {
             customers.push(customerData);
         }
 
-        localStorage.setItem('wms_customers', JSON.stringify(customers));
+        this.storage.saveCustomers(customers);
 
         alert(customerIndex !== null ? '✅ Cliente atualizado com sucesso!' : '✅ Cliente adicionado com sucesso!');
         this.cancelCustomerForm();
@@ -1186,15 +1150,7 @@ class SettingsUI {
     }
 
     deleteCustomer(index) {
-        let customers = [];
-        try {
-            const stored = localStorage.getItem('wms_customers');
-            if (stored) {
-                customers = JSON.parse(stored);
-            }
-        } catch (e) {
-            return;
-        }
+        const customers = this.storage.loadCustomers();
 
         if (index < 0 || index >= customers.length) return;
 
@@ -1203,7 +1159,7 @@ class SettingsUI {
         }
 
         customers.splice(index, 1);
-        localStorage.setItem('wms_customers', JSON.stringify(customers));
+        this.storage.saveCustomers(customers);
 
         alert('✅ Cliente apagado com sucesso!');
         this.displayCustomers();

@@ -29,7 +29,7 @@ const App = {
 /**
  * Initialize application
  */
-function initializeApp() {
+async function initializeApp() {
     console.log('🚀 Initializing Warehouse Management System...');
 
     try {
@@ -38,12 +38,18 @@ function initializeApp() {
 
         // Initialize core services
         App.storage = new StorageService();
+
+        // Initialize IndexedDB and load data into cache
+        console.log('📦 Initializing database...');
+        await App.storage.init();
+        console.log('✅ Database initialized successfully!');
+
         App.parser = new WhatsAppParser();
         App.validator = new OrderValidator({
             maxQuantityThreshold: 300
         });
 
-        // Load data
+        // Load data from cache (now synchronous)
         const products = App.storage.loadProducts();
         const distributors = App.storage.loadDistributors();
         const zones = App.storage.loadZones();
