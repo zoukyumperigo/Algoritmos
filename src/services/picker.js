@@ -369,6 +369,8 @@ class PickingListOptimizer {
      * Generate printable picking list (HTML)
      */
     generatePrintableHTML(pickingList) {
+        const groupedBy = pickingList.groupBy || 'product';
+
         let html = `
 <!DOCTYPE html>
 <html>
@@ -379,7 +381,7 @@ class PickingListOptimizer {
         @page { margin: 1cm; }
         body {
             font-family: Arial, sans-serif;
-            font-size: 14pt;
+            font-size: 12pt;
             line-height: 1.4;
         }
         h1 {
@@ -398,7 +400,7 @@ class PickingListOptimizer {
         .zone-header {
             padding: 10px;
             color: white;
-            font-size: 18pt;
+            font-size: 16pt;
             font-weight: bold;
             margin-bottom: 10px;
         }
@@ -412,19 +414,31 @@ class PickingListOptimizer {
             color: white;
             padding: 8px;
             text-align: left;
+            font-size: 11pt;
         }
         td {
             padding: 8px;
             border-bottom: 1px solid #ccc;
+            font-size: 10pt;
         }
         .quantity {
-            font-size: 16pt;
+            font-size: 14pt;
             font-weight: bold;
+            text-align: center;
+        }
+        .subtotal-row {
+            background: #e0f2fe;
+            font-weight: bold;
+        }
+        .total-row {
+            background: #f1f5f9;
+            font-weight: bold;
+            font-size: 11pt;
         }
     </style>
 </head>
 <body>
-    <h1>📋 LISTA DE PICKING</h1>
+    <h1>📋 LISTA DE PICKING - ${groupedBy === 'distributor' ? 'POR MOTORISTA' : 'POR PRODUTO'}</h1>
     <div class="summary">
         <strong>Data:</strong> ${new Date().toLocaleDateString('pt-PT')}<br>
         <strong>Total Pedidos:</strong> ${pickingList.summary.totalOrders} |
@@ -433,8 +447,10 @@ class PickingListOptimizer {
     </div>
 `;
 
-        pickingList.zones.forEach(zoneData => {
-            html += `
+        if (groupedBy === 'distributor') {
+            // Print by distributor
+            pickingList.zones.forEach(zoneData => {
+                html += `
     <div class="zone-section">
         <div class="zone-header" style="background-color: ${zoneData.zone.color};">
             ${zoneData.zone.name} - ${zoneData.totalBoxes} caixas
@@ -442,37 +458,115 @@ class PickingListOptimizer {
         <table>
             <thead>
                 <tr>
-                    <th>Produto</th>
-                    <th>Distribuidor</th>
-                    <th>Restaurante</th>
-                    <th>Quantidade</th>
+                    <th style="width: 20%;">Motorista</th>
+                    <th style="width: 30%;">Produto</th>
+                    <th style="width: 30%;">Restaurante</th>
+                    <th style="width: 10%;">Qtd</th>
+                    <th style="width: 10%;">Kg</th>
                 </tr>
             </thead>
             <tbody>
 `;
 
-            zoneData.products.forEach(product => {
-                product.distributors.forEach((dist, distIndex) => {
-                    dist.orders.forEach((order, orderIndex) => {
-                        const isFirstRow = distIndex === 0 && orderIndex === 0;
-                        html += `
+                zoneData.distributors.forEach(dist => {
+                    const distRowSpan = dist.products.reduce((sum, p) => sum + p.orders.length + 1, 0); // +1 for subtotal rows
+
+                    dist.products.forEach((product, productIndex) => {
+                        product.orders.forEach((order, orderIndex) => {
+                            const isFirstRowOfDist = productIndex === 0 && orderIndex === 0;
+                            const totalKg = (order.quantity * product.kgPerBox).toFixed(1);
+
+                            html += `
                 <tr>
-                    ${isFirstRow ? `<td rowspan="${this.countTotalOrders(product)}">${product.name}</td>` : ''}
-                    <td>${dist.distributor}</td>
+                    ${isFirstRowOfDist ? `<td rowspan="${distRowSpan}" style="font-weight: bold; vertical-align: top; padding-top: 12px;">${dist.distributor}</td>` : ''}
+                    <td>${product.name}</td>
                     <td>${order.restaurant}</td>
                     <td class="quantity">${order.quantity}</td>
+                    <td style="text-align: center;">${totalKg}</td>
+                </tr>
+`;
+                        });
+
+                        // Subtotal row for product
+                        const productTotalQty = product.orders.reduce((sum, o) => sum + o.quantity, 0);
+                        const productTotalKg = (productTotalQty * product.kgPerBox).toFixed(1);
+
+                        html += `
+                <tr class="subtotal-row">
+                    <td colspan="2" style="text-align: right; padding-right: 10px;">Subtotal ${product.name}:</td>
+                    <td class="quantity">${productTotalQty}</td>
+                    <td style="text-align: center;">${productTotalKg}</td>
                 </tr>
 `;
                     });
-                });
-            });
 
-            html += `
+                    // Total row for distributor
+                    html += `
+                <tr class="total-row">
+                    <td colspan="3" style="text-align: right; padding-right: 10px;">TOTAL ${dist.distributor}:</td>
+                    <td class="quantity">${dist.totalBoxes}</td>
+                    <td style="text-align: center;">${dist.totalKg.toFixed(1)}</td>
+                </tr>
+`;
+                });
+
+                html += `
             </tbody>
         </table>
     </div>
 `;
-        });
+            });
+        } else {
+            // Print by product (original mode)
+            pickingList.zones.forEach(zoneData => {
+                html += `
+    <div class="zone-section">
+        <div class="zone-header" style="background-color: ${zoneData.zone.color};">
+            ${zoneData.zone.name} - ${zoneData.totalBoxes} caixas
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 30%;">Produto</th>
+                    <th style="width: 20%;">Distribuidor</th>
+                    <th style="width: 35%;">Restaurante</th>
+                    <th style="width: 15%;">Quantidade</th>
+                </tr>
+            </thead>
+            <tbody>
+`;
+
+                zoneData.products.forEach(product => {
+                    product.distributors.forEach((dist, distIndex) => {
+                        dist.orders.forEach((order, orderIndex) => {
+                            const isFirstRow = distIndex === 0 && orderIndex === 0;
+                            html += `
+                <tr>
+                    ${isFirstRow ? `<td rowspan="${this.countTotalOrders(product)}" style="font-weight: bold;">${product.name}</td>` : ''}
+                    <td><strong>${dist.distributor}</strong></td>
+                    <td>${order.restaurant}</td>
+                    <td class="quantity">${order.quantity}</td>
+                </tr>
+`;
+                        });
+                    });
+
+                    // Total row for product
+                    html += `
+                <tr class="total-row">
+                    <td colspan="3" style="text-align: right; padding-right: 10px;">TOTAL ${product.name}:</td>
+                    <td class="quantity">${product.totalQuantity}</td>
+                </tr>
+`;
+                });
+
+                html += `
+            </tbody>
+        </table>
+    </div>
+`;
+            });
+        }
 
         html += `
 </body>
