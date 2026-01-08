@@ -57,9 +57,34 @@ body {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.company-logo {
+    height: 60px;
+    width: auto;
+    object-fit: contain;
+}
+
+.header-title {
+    display: flex;
+    flex-direction: column;
+}
+
 .app-header h1 {
     font-size: 1.8rem;
     color: var(--text-dark);
+    margin-bottom: 0;
+}
+
+.company-name {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-top: 2px;
 }
 
 .header-actions {
@@ -134,6 +159,59 @@ body {
     color: var(--text-muted);
     font-size: 1.1rem;
     line-height: 1.8;
+}
+
+/* ========================================
+   MOTIVATIONAL BANNER
+   ======================================== */
+
+.motivational-banner {
+    background: linear-gradient(135deg, #16a34a 0%, #10b981 100%);
+    border-radius: 12px;
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    animation: fadeIn 0.5s ease-in;
+}
+
+.motivational-content {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    color: white;
+}
+
+.motivational-icon {
+    font-size: 2.5rem;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.motivational-phrase {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin: 0;
+    line-height: 1.6;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
 }
 
 /* ========================================

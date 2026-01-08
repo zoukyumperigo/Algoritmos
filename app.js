@@ -113,6 +113,9 @@ async function initializeApp() {
         // Initialize sales rep selector
         initializeSalesRepSelector();
 
+        // Initialize motivational phrases
+        initializeMotivationalPhrases();
+
         console.log('✅ Application initialized successfully!');
         console.log(`   - ${products.length} products loaded`);
         console.log(`   - ${distributors.length} distributors loaded`);
@@ -241,6 +244,56 @@ function clearSalesRepFilter() {
     } else if (App.currentView === 'history') {
         App.historyUI.refresh();
     }
+}
+
+/**
+ * Initialize motivational phrases
+ */
+function initializeMotivationalPhrases() {
+    const phrases = [
+        "Cada pedido é uma oportunidade de excelência! 🌟",
+        "Precisão e rapidez: a nossa força! 💪",
+        "Juntos construímos o sucesso do amanhã! 🚀",
+        "A qualidade começa aqui, no armazém! ✨",
+        "Excelência em cada produto, eficiência em cada entrega! 📦",
+        "O trabalho em equipa faz a diferença! 🤝",
+        "Crescemos quando crescemos juntos! 🌱",
+        "Cada dia é uma nova oportunidade de superação! 🎯",
+        "A sua dedicação é o nosso maior ativo! 💎",
+        "Inovação e tradição em perfeita harmonia! 🔄",
+        "Século Verde: Frescura que transforma negócios! 🦐",
+        "Do mar para a mesa, com qualidade garantida! 🌊"
+    ];
+
+    const phraseElement = document.getElementById('motivationalPhrase');
+
+    if (!phraseElement) return;
+
+    // Function to update phrase
+    function updatePhrase() {
+        const randomIndex = Math.floor(Math.random() * phrases.length);
+        const phrase = phrases[randomIndex];
+
+        // Fade out
+        phraseElement.style.opacity = '0';
+
+        setTimeout(() => {
+            phraseElement.textContent = phrase;
+            // Fade in
+            phraseElement.style.opacity = '1';
+        }, 300);
+    }
+
+    // Set initial phrase
+    updatePhrase();
+
+    // Rotate phrases every 10 seconds
+    setInterval(updatePhrase, 10000);
+}
+
+// Add transition to motivational phrase
+if (document.getElementById('motivationalPhrase')) {
+    document.getElementById('motivationalPhrase').style.transition = 'opacity 0.3s ease-in-out';
 }
 
 /**

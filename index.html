@@ -10,7 +10,13 @@
     <div id="app">
         <!-- HEADER -->
         <header class="app-header">
-            <h1>🏢 Sistema de Gestão de Armazém</h1>
+            <div class="header-left">
+                <img src="assets/logo.png" alt="Século Verde Frozen Foods" class="company-logo" onerror="this.style.display='none'">
+                <div class="header-title">
+                    <h1>🏢 Sistema de Gestão de Armazém</h1>
+                    <p class="company-name">Século Verde Frozen Foods</p>
+                </div>
+            </div>
             <div class="header-actions">
                 <select id="salesRepSelector" class="sales-rep-selector">
                     <option value="">Todos os Vendedores</option>
@@ -40,6 +46,14 @@
                         Cole o texto do WhatsApp ou carregue um ficheiro .txt<br>
                         <strong>Formato:</strong> Linha 1: Inicial Distribuidor | Linha 2: Nome Restaurante | Linhas 3+: Quantidade NomeProduto (um produto por linha)
                     </p>
+                </div>
+
+                <!-- MOTIVATIONAL PHRASE -->
+                <div class="motivational-banner">
+                    <div class="motivational-content">
+                        <span class="motivational-icon">💪</span>
+                        <p id="motivationalPhrase" class="motivational-phrase"></p>
+                    </div>
                 </div>
 
                 <div class="import-area">
