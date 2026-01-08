@@ -1188,9 +1188,9 @@ class SettingsUI {
                 <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
                     <h4 style="margin-top: 0;">📦 Importar Produtos</h4>
                     <p style="font-size: 0.9rem; color: #64748b;">
-                        Formato JSON esperado: array de objectos com campos obrigatórios:<br>
-                        <code style="background: #fff; padding: 2px 6px; border-radius: 4px;">sku, name, zone, currentStock, kgPerBox, boxesPerPallet, reorderPoint, supplier</code><br>
-                        Campo opcional: <code style="background: #fff; padding: 2px 6px; border-radius: 4px;">aliases</code> (array de strings)
+                        <strong>Campos obrigatórios:</strong> <code style="background: #fff; padding: 2px 6px; border-radius: 4px;">sku, name, zone, kgPerBox</code><br>
+                        <strong>Campos opcionais:</strong> <code style="background: #fff; padding: 2px 6px; border-radius: 4px;">aliases, currentStock, boxesPerPallet, reorderPoint, supplier, notes</code><br>
+                        <small>(Valores padrão serão aplicados para campos opcionais)</small>
                     </p>
                     <div style="margin: 15px 0;">
                         <input type="file" id="productsJsonFile" accept=".json" style="margin-bottom: 10px;">
@@ -1220,31 +1220,25 @@ class SettingsUI {
                     <h4 style="margin-top: 0; color: #0369a1;">📋 Exemplo de Formato JSON</h4>
 
                     <details style="margin-bottom: 15px;">
-                        <summary style="cursor: pointer; font-weight: 600; color: #0369a1;">Exemplo: Produtos JSON</summary>
+                        <summary style="cursor: pointer; font-weight: 600; color: #0369a1;">Exemplo: Produtos JSON (Formato Simples)</summary>
                         <pre style="background: #fff; padding: 15px; border-radius: 4px; overflow-x: auto; font-size: 0.85rem; margin-top: 10px;"><code>[
   {
     "sku": "CAM-41-50",
     "name": "Camarão 41/50",
     "aliases": ["Camarão 41-50", "Shrimp 41/50", "41/50"],
     "zone": "FROZEN_SEAFOOD",
-    "currentStock": 150,
-    "kgPerBox": 2.5,
-    "boxesPerPallet": 60,
-    "reorderPoint": 50,
-    "supplier": "FreshSea Import"
+    "kgPerBox": 2.5
   },
   {
     "sku": "ARR-SUSHI",
     "name": "Arroz Sushi",
     "aliases": ["Sushi Rice", "Rice Sushi"],
     "zone": "DRY_GOODS",
-    "currentStock": 200,
-    "kgPerBox": 5,
-    "boxesPerPallet": 40,
-    "reorderPoint": 30,
-    "supplier": "Asia Foods"
+    "kgPerBox": 5
   }
-]</code></pre>
+]
+
+<strong>Nota:</strong> Campos opcionais (currentStock, boxesPerPallet, reorderPoint, supplier) receberão valores padrão se não forem especificados.</code></pre>
                     </details>
 
                     <details>
@@ -1277,13 +1271,14 @@ class SettingsUI {
             return { valid: false, errors: ['JSON deve ser um array de produtos'] };
         }
 
-        const requiredFields = ['sku', 'name', 'zone', 'currentStock', 'kgPerBox', 'boxesPerPallet', 'reorderPoint', 'supplier'];
+        // Only sku, name, zone, and kgPerBox are required
+        const requiredFields = ['sku', 'name', 'zone', 'kgPerBox'];
         const validZones = ['FROZEN_SEAFOOD', 'FROZEN_MEAT', 'FROZEN_PRECOOKED', 'DRY_GOODS'];
 
         data.forEach((product, index) => {
             // Check required fields
             requiredFields.forEach(field => {
-                if (product[field] === undefined || product[field] === null) {
+                if (product[field] === undefined || product[field] === null || product[field] === '') {
                     errors.push(`Produto ${index + 1}: campo "${field}" é obrigatório`);
                 }
             });
@@ -1293,15 +1288,15 @@ class SettingsUI {
                 errors.push(`Produto ${index + 1}: zona "${product.zone}" inválida. Zonas válidas: ${validZones.join(', ')}`);
             }
 
-            // Validate numeric fields
+            // Validate numeric fields if present
             ['currentStock', 'kgPerBox', 'boxesPerPallet', 'reorderPoint'].forEach(field => {
-                if (product[field] !== undefined && typeof product[field] !== 'number') {
+                if (product[field] !== undefined && product[field] !== null && typeof product[field] !== 'number') {
                     errors.push(`Produto ${index + 1}: campo "${field}" deve ser número`);
                 }
             });
 
             // Validate aliases if present
-            if (product.aliases && !Array.isArray(product.aliases)) {
+            if (product.aliases !== undefined && !Array.isArray(product.aliases)) {
                 errors.push(`Produto ${index + 1}: campo "aliases" deve ser array`);
             }
         });
@@ -1503,9 +1498,14 @@ class SettingsUI {
                 if (existingSKUs.has(productData.sku)) {
                     skipped++;
                 } else {
+                    // Provide default values for optional fields
                     const product = new Product({
                         ...productData,
                         aliases: productData.aliases || [],
+                        currentStock: productData.currentStock !== undefined ? productData.currentStock : 0,
+                        boxesPerPallet: productData.boxesPerPallet || 50,
+                        reorderPoint: productData.reorderPoint || 5,
+                        supplier: productData.supplier || '',
                         notes: productData.notes || ''
                     });
                     existingProducts.push(product);
