@@ -56,7 +56,7 @@ class ProductNormalizer {
     }
 
     /**
-     * Find product by code/alias
+     * Find product by code/alias (exact match)
      */
     findProduct(productCode) {
         const normalized = this.normalizeCode(productCode);
@@ -65,6 +65,30 @@ class ProductNormalizer {
         if (!sku) return null;
 
         return this.products.find(p => p.sku === sku);
+    }
+
+    /**
+     * Match product from line using flexible matching (includes)
+     * More flexible than findProduct - checks if any alias is contained in the line
+     */
+    matchProduct(line) {
+        const cleanLine = this.normalizeCode(line);
+
+        for (const product of this.products) {
+            // Check product name
+            if (cleanLine.includes(this.normalizeCode(product.name))) {
+                return product;
+            }
+
+            // Check all aliases
+            for (const alias of product.aliases) {
+                const normalizedAlias = this.normalizeCode(alias);
+                if (normalizedAlias && cleanLine.includes(normalizedAlias)) {
+                    return product;
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -84,7 +108,13 @@ class ProductNormalizer {
 
         // Normalize each item
         order.items.forEach((item, index) => {
-            const product = this.findProduct(item.productCode);
+            // Try exact match first
+            let product = this.findProduct(item.productCode);
+
+            // If exact match fails, try flexible matching
+            if (!product) {
+                product = this.matchProduct(item.productCode);
+            }
 
             if (product) {
                 // Fill in product details
