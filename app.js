@@ -343,12 +343,44 @@ Dados:
     alert(info);
 }
 
+/**
+ * RULE 4: Update picking progress when checkboxes are clicked
+ * Shows visual feedback for completed items
+ */
+function updatePickingProgress() {
+    // Count checked items
+    const allCheckboxes = document.querySelectorAll('.pick-checkbox');
+    const checkedCount = document.querySelectorAll('.pick-checkbox:checked').length;
+    const totalCount = allCheckboxes.length;
+
+    // Update any progress indicators if they exist
+    const progressElements = document.querySelectorAll('.picking-progress');
+    progressElements.forEach(el => {
+        el.textContent = `${checkedCount}/${totalCount} items picked`;
+    });
+
+    // Mark completed rows with strikethrough
+    allCheckboxes.forEach(checkbox => {
+        const row = checkbox.closest('tr');
+        if (row && !row.classList.contains('total-row')) {
+            if (checkbox.checked) {
+                row.style.opacity = '0.5';
+                row.style.textDecoration = 'line-through';
+            } else {
+                row.style.opacity = '1';
+                row.style.textDecoration = 'none';
+            }
+        }
+    });
+}
+
 // Add to window for console access
 window.App = App;
 window.exportAllData = exportAllData;
 window.importAllData = importAllData;
 window.resetAllData = resetAllData;
 window.showAppInfo = showAppInfo;
+window.updatePickingProgress = updatePickingProgress;
 
 // Initialize when DOM is ready
 if (document.readyState === 'loading') {

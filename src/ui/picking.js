@@ -88,6 +88,13 @@ class PickingUI {
         }
 
         let html = `
+            <!-- RULE 4: Total boxes banner at top - impossible to miss -->
+            <div class="total-boxes-banner">
+                <div class="label">Total a Recolher Hoje</div>
+                <div class="value">${pickingList.summary.totalBoxes} CAIXAS</div>
+                <div class="subtitle">${pickingList.summary.totalKg.toFixed(1)} kg total | ${pickingList.summary.totalOrders} pedidos | ${pickingList.summary.distributors.length} distribuidores</div>
+            </div>
+
             <div class="picking-summary" style="background: #f1f5f9; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
                 <h3 style="margin-top: 0;">📊 Resumo</h3>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
@@ -138,15 +145,23 @@ class PickingUI {
                 <table class="picking-table">
                     <thead>
                         <tr>
-                            <th style="width: 30%;">Produto</th>
-                            <th style="width: 15%;">Distribuidor</th>
-                            <th style="width: 35%;">Restaurante</th>
-                            <th style="width: 10%;" class="quantity-cell">Qtd</th>
-                            <th style="width: 10%;">Kg</th>
+                            <th class="checkbox-cell">✓</th>
+                            <th style="width: 5%;">#</th>
+                            <th style="width: 25%;">Produto</th>
+                            <th style="width: 12%;">Distribuidor</th>
+                            <th style="width: 28%;">Restaurante</th>
+                            <th style="width: 12%;">Quantidade</th>
+                            <th style="width: 8%;">Kg</th>
+                            <th style="width: 10%;">Total</th>
                         </tr>
                     </thead>
                     <tbody>
         `;
+
+        // RULE 3: Sequential numbering across all items in zone
+        let itemNumber = 1;
+        let runningTotal = 0;
+        const totalItemsInZone = zoneData.products.reduce((sum, p) => sum + this.countTotalOrders(p), 0);
 
         zoneData.products.forEach(product => {
             product.distributors.forEach((dist, distIndex) => {
@@ -155,8 +170,15 @@ class PickingUI {
                     const totalOrders = this.countTotalOrders(product);
                     const totalKg = (order.quantity * product.kgPerBox).toFixed(1);
 
+                    // RULE 4: Running total
+                    runningTotal += order.quantity;
+
                     html += `
-                        <tr>
+                        <tr data-item-number="${itemNumber}">
+                            <td class="checkbox-cell">
+                                <input type="checkbox" class="pick-checkbox" onchange="updatePickingProgress()">
+                            </td>
+                            <td class="item-number">${itemNumber}/${totalItemsInZone}</td>
                             ${isFirstRow ? `
                                 <td rowspan="${totalOrders}" style="font-weight: bold; background: #f8fafc;">
                                     ${product.name}
@@ -164,19 +186,28 @@ class PickingUI {
                             ` : ''}
                             <td><strong>${dist.distributor}</strong></td>
                             <td>${order.restaurant}</td>
-                            <td class="quantity-cell">${order.quantity}</td>
-                            <td>${totalKg}</td>
+                            <td class="quantity-cell">
+                                <div style="font-size: 2.5rem; font-weight: 900;">${order.quantity}</div>
+                                <div style="font-size: 0.9rem; color: #92400e;">CAIXAS</div>
+                            </td>
+                            <td style="text-align: center;">${totalKg}</td>
+                            <td class="running-total-cell">${runningTotal}</td>
                         </tr>
                     `;
+                    itemNumber++;
                 });
             });
 
             // Total row for product
             html += `
-                <tr style="background: #f1f5f9; font-weight: bold;">
-                    <td colspan="3" style="text-align: right;">TOTAL ${product.name}:</td>
-                    <td class="quantity-cell">${product.totalQuantity}</td>
-                    <td>${product.totalKg.toFixed(1)}</td>
+                <tr class="total-row">
+                    <td colspan="5" style="text-align: right; font-weight: bold;">TOTAL ${product.name}:</td>
+                    <td class="quantity-cell">
+                        <div style="font-size: 2rem; font-weight: 900;">${product.totalQuantity}</div>
+                        <div style="font-size: 0.8rem; color: #92400e;">CAIXAS</div>
+                    </td>
+                    <td style="text-align: center; font-weight: bold;">${product.totalKg.toFixed(1)}</td>
+                    <td></td>
                 </tr>
             `;
         });
@@ -212,15 +243,25 @@ class PickingUI {
                 <table class="picking-table">
                     <thead>
                         <tr>
-                            <th style="width: 20%;">Motorista</th>
-                            <th style="width: 30%;">Produto</th>
-                            <th style="width: 30%;">Restaurante</th>
-                            <th style="width: 10%;" class="quantity-cell">Qtd</th>
-                            <th style="width: 10%;">Kg</th>
+                            <th class="checkbox-cell">✓</th>
+                            <th style="width: 5%;">#</th>
+                            <th style="width: 18%;">Motorista</th>
+                            <th style="width: 25%;">Produto</th>
+                            <th style="width: 25%;">Restaurante</th>
+                            <th style="width: 12%;">Quantidade</th>
+                            <th style="width: 7%;">Kg</th>
+                            <th style="width: 8%;">Total</th>
                         </tr>
                     </thead>
                     <tbody>
         `;
+
+        // RULE 3: Sequential numbering across all items in zone
+        let itemNumber = 1;
+        let runningTotal = 0;
+        const totalItemsInZone = zoneData.distributors.reduce(
+            (sum, d) => sum + d.products.reduce((s, p) => s + p.orders.length, 0), 0
+        );
 
         zoneData.distributors.forEach(dist => {
             // Calculate rowspan including product subtotal rows
@@ -231,8 +272,15 @@ class PickingUI {
                     const isFirstRowOfDist = productIndex === 0 && orderIndex === 0;
                     const totalKg = (order.quantity * product.kgPerBox).toFixed(1);
 
+                    // RULE 4: Running total
+                    runningTotal += order.quantity;
+
                     html += `
-                        <tr>
+                        <tr data-item-number="${itemNumber}">
+                            <td class="checkbox-cell">
+                                <input type="checkbox" class="pick-checkbox" onchange="updatePickingProgress()">
+                            </td>
+                            <td class="item-number">${itemNumber}/${totalItemsInZone}</td>
                             ${isFirstRowOfDist ? `
                                 <td rowspan="${distRowSpan}" style="font-weight: bold; background: #f8fafc; vertical-align: top; padding-top: 15px;">
                                     <div style="font-size: 1.1rem;">${dist.distributor}</div>
@@ -244,10 +292,15 @@ class PickingUI {
                             ` : ''}
                             <td>${product.name}</td>
                             <td>${order.restaurant}</td>
-                            <td class="quantity-cell">${order.quantity}</td>
-                            <td>${totalKg}</td>
+                            <td class="quantity-cell">
+                                <div style="font-size: 2.5rem; font-weight: 900;">${order.quantity}</div>
+                                <div style="font-size: 0.9rem; color: #92400e;">CAIXAS</div>
+                            </td>
+                            <td style="text-align: center;">${totalKg}</td>
+                            <td class="running-total-cell">${runningTotal}</td>
                         </tr>
                     `;
+                    itemNumber++;
                 });
 
                 // Subtotal row for product
@@ -255,21 +308,28 @@ class PickingUI {
                 const productTotalKg = (productTotalQty * product.kgPerBox).toFixed(1);
 
                 html += `
-                    <tr style="background: #e0f2fe; font-weight: 600; border-top: 2px solid #0ea5e9;">
-                        <td style="text-align: right; padding-right: 10px; font-style: italic;">Subtotal ${product.name}:</td>
+                    <tr class="total-row" style="border-top: 2px solid #0ea5e9;">
+                        <td colspan="5" style="text-align: right; padding-right: 10px; font-style: italic;">Subtotal ${product.name}:</td>
+                        <td class="quantity-cell">
+                            <div style="font-size: 1.5rem; font-weight: 900; color: #0369a1;">${productTotalQty}</div>
+                            <div style="font-size: 0.8rem; color: #0369a1;">CAIXAS</div>
+                        </td>
+                        <td style="text-align: center; color: #0369a1;">${productTotalKg}</td>
                         <td></td>
-                        <td class="quantity-cell" style="color: #0369a1;">${productTotalQty}</td>
-                        <td style="color: #0369a1;">${productTotalKg}</td>
                     </tr>
                 `;
             });
 
             // Total row for distributor
             html += `
-                <tr style="background: #f1f5f9; font-weight: bold;">
-                    <td colspan="3" style="text-align: right;">TOTAL ${dist.distributor}:</td>
-                    <td class="quantity-cell">${dist.totalBoxes}</td>
-                    <td>${dist.totalKg.toFixed(1)}</td>
+                <tr class="total-row">
+                    <td colspan="5" style="text-align: right; font-weight: bold;">TOTAL ${dist.distributor}:</td>
+                    <td class="quantity-cell">
+                        <div style="font-size: 2rem; font-weight: 900;">${dist.totalBoxes}</div>
+                        <div style="font-size: 0.8rem; color: #92400e;">CAIXAS</div>
+                    </td>
+                    <td style="text-align: center; font-weight: bold;">${dist.totalKg.toFixed(1)}</td>
+                    <td></td>
                 </tr>
             `;
         });
