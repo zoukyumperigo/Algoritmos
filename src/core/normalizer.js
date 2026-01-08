@@ -39,15 +39,20 @@ class ProductNormalizer {
 
     /**
      * Normalize product code for comparison
-     * Removes spaces, special chars, converts to uppercase
+     * Removes accents, spaces, special chars, units, and quantities
      */
     normalizeCode(code) {
         if (!code) return '';
 
         return code
             .toString()
-            .toUpperCase()
-            .replace(/[^A-Z0-9]/g, ''); // Remove all non-alphanumeric
+            .toLowerCase()
+            .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // remove acentos
+            .replace(/\b(un|cx|caixa|kg|kgs)\b/g, "")        // remove unidades
+            .replace(/^\d+\s*/g, "")                         // remove qty inicial
+            .replace(/[^a-z0-9/ ]/g, "")                     // limpa símbolos (mantém /)
+            .replace(/\s+/g, "")                             // remove espaços
+            .replace(/\//g, "");                              // remove /
     }
 
     /**
