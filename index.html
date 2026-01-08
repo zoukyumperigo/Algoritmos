@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestão de Armazém - Frozen Foods</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- HEADER -->
+        <header class="app-header">
+            <h1>🏢 Sistema de Gestão de Armazém</h1>
+            <div class="header-actions">
+                <select id="salesRepSelector" class="sales-rep-selector">
+                    <option value="">Todos os Vendedores</option>
+                </select>
+                <button id="settingsBtn" class="btn-secondary">⚙️ Configurações</button>
+            </div>
+        </header>
+
+        <!-- NAVIGATION -->
+        <nav class="main-nav">
+            <button class="nav-btn active" data-view="import">📥 Importar Pedidos</button>
+            <button class="nav-btn" data-view="route">🚚 Gestão de Rotas</button>
+            <button class="nav-btn" data-view="picking">📋 Lista de Picking</button>
+            <button class="nav-btn" data-view="history">📊 Histórico</button>
+            <button class="nav-btn" data-view="forecast">📈 Previsão de Compras</button>
+            <button class="nav-btn" data-view="stock">📦 Stock</button>
+        </nav>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="main-content">
+
+            <!-- IMPORT VIEW -->
+            <section id="importView" class="view active">
+                <div class="view-header">
+                    <h2>Importar Pedidos WhatsApp</h2>
+                    <p class="help-text">
+                        Cole o texto do WhatsApp ou carregue um ficheiro .txt<br>
+                        <strong>Formato:</strong> Linha 1: Inicial Distribuidor | Linha 2: Nome Restaurante | Linhas 3+: Quantidade NomeProduto (um produto por linha)
+                    </p>
+                </div>
+
+                <div class="import-area">
+                    <div class="input-methods">
+                        <div class="input-method">
+                            <h3>Colar Texto</h3>
+                            <textarea id="whatsappText" placeholder="Exemplo:
+J
+Restaurante Marazul
+10 Camarão 41/50
+5 Polvo
+15 Arroz Sushi
+
+M
+Restaurant Golden Dragon
+5 Camarão 26/30
+15 Arroz Sushi
+3 Spring Roll"
+                                rows="15"></textarea>
+                            <button id="parseBtn" class="btn-primary">🔍 Processar Pedidos</button>
+                        </div>
+                        <div class="input-method">
+                            <h3>Carregar Ficheiro</h3>
+                            <input type="file" id="fileUpload" accept=".txt">
+                            <button id="uploadBtn" class="btn-primary">📤 Carregar e Processar</button>
+                        </div>
+                    </div>
+
+                    <!-- PARSED ORDERS PREVIEW -->
+                    <div id="parsedOrdersContainer" class="parsed-orders-container" style="display: none;">
+                        <h3>Pedidos Processados</h3>
+                        <div id="errorSummary" class="error-summary"></div>
+                        <div id="parsedOrdersList" class="parsed-orders-list"></div>
+                        <div class="action-buttons">
+                            <button id="confirmOrdersBtn" class="btn-success">✅ Confirmar e Guardar Pedidos</button>
+                            <button id="cancelOrdersBtn" class="btn-danger">❌ Cancelar</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ROUTE MANAGEMENT VIEW -->
+            <section id="routeView" class="view">
+                <div class="view-header">
+                    <h2>Gestão de Rotas</h2>
+                    <p class="help-text">
+                        Visualize pedidos agrupados por distribuidor e mude rotas manualmente
+                    </p>
+                    <div style="margin-top: 15px;">
+                        <button id="refreshRoutesBtn" class="btn-primary">🔄 Atualizar</button>
+                    </div>
+                </div>
+                <div id="routeContainer" class="route-container"></div>
+            </section>
+
+            <!-- PICKING LIST VIEW -->
+            <section id="pickingView" class="view">
+                <div class="view-header">
+                    <h2>Lista de Picking</h2>
+                    <div class="picking-controls">
+                        <select id="pickingDateFilter">
+                            <option value="today">Hoje</option>
+                            <option value="pending">Pendentes</option>
+                            <option value="all">Todos</option>
+                        </select>
+                        <button id="groupByBtn" class="btn-secondary">🚚 Agrupar por Motorista</button>
+                        <button id="printPickingBtn" class="btn-primary">🖨️ Imprimir</button>
+                    </div>
+                </div>
+                <div id="pickingListContainer" class="picking-list-container"></div>
+            </section>
+
+            <!-- HISTORY VIEW -->
+            <section id="historyView" class="view">
+                <div class="view-header">
+                    <h2>Histórico de Pedidos</h2>
+                    <div class="history-filters">
+                        <input type="date" id="dateFrom" class="filter-input">
+                        <input type="date" id="dateTo" class="filter-input">
+                        <select id="restaurantFilter" class="filter-input">
+                            <option value="">Todos os Restaurantes</option>
+                        </select>
+                        <select id="distributorFilter" class="filter-input">
+                            <option value="">Todos os Distribuidores</option>
+                        </select>
+                        <select id="productFilter" class="filter-input">
+                            <option value="">Todos os Produtos</option>
+                        </select>
+                        <button id="applyHistoryFilter" class="btn-primary">🔍 Filtrar</button>
+                        <button id="exportHistoryBtn" class="btn-secondary">📊 Exportar CSV</button>
+                    </div>
+                </div>
+                <div id="historyContainer" class="history-container"></div>
+            </section>
+
+            <!-- FORECAST VIEW -->
+            <section id="forecastView" class="view">
+                <div class="view-header">
+                    <h2>Previsão de Compras</h2>
+                    <p class="help-text">Análise das últimas 4 semanas</p>
+                </div>
+                <div id="forecastContainer" class="forecast-container"></div>
+            </section>
+
+            <!-- STOCK VIEW -->
+            <section id="stockView" class="view">
+                <div class="view-header">
+                    <h2>Gestão de Stock</h2>
+                    <button id="addProductBtn" class="btn-primary">➕ Adicionar Produto</button>
+                </div>
+                <div id="stockContainer" class="stock-container"></div>
+            </section>
+
+        </main>
+
+        <!-- SETTINGS MODAL -->
+        <div id="settingsModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Configurações</h2>
+                <div class="settings-tabs">
+                    <button class="settings-tab active" data-tab="products">Produtos</button>
+                    <button class="settings-tab" data-tab="distributors">Distribuidores</button>
+                    <button class="settings-tab" data-tab="customers">Clientes</button>
+                    <button class="settings-tab" data-tab="salesreps">Vendedores</button>
+                    <button class="settings-tab" data-tab="zones">Zonas</button>
+                </div>
+                <div id="settingsContent" class="settings-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core Application Files -->
+    <!-- Load utilities first for constants and helpers -->
+    <script src="src/utils/constants.js"></script>
+    <script src="src/utils/helpers.js"></script>
+
+    <script src="src/data/sample-data.js"></script>
+    <script src="src/models/Product.js"></script>
+    <script src="src/models/Order.js"></script>
+    <script src="src/models/Distributor.js"></script>
+    <script src="src/models/Zone.js"></script>
+    <script src="src/core/indexeddb.js"></script>
+    <script src="src/core/storage.js"></script>
+    <script src="src/core/parser.js"></script>
+    <script src="src/core/normalizer.js"></script>
+    <script src="src/core/validator.js"></script>
+    <script src="src/services/picker.js"></script>
+    <script src="src/services/analytics.js"></script>
+    <script src="src/ui/import.js"></script>
+    <script src="src/ui/route.js"></script>
+    <script src="src/ui/picking.js"></script>
+    <script src="src/ui/history.js"></script>
+    <script src="src/ui/forecast.js"></script>
+    <script src="src/ui/stock.js"></script>
+    <script src="src/ui/settings.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

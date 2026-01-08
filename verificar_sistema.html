@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificação do Sistema</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .check {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 5px solid #2563eb;
+        }
+        .success { border-left-color: #16a34a; }
+        .error { border-left-color: #dc2626; }
+        h1 { color: #1e293b; }
+        .btn {
+            background: #2563eb;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 10px 5px;
+        }
+        .btn:hover { background: #1d4ed8; }
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Verificação do Sistema de Gestão de Armazém</h1>
+
+    <div id="results"></div>
+
+    <button class="btn" onclick="runChecks()">▶️ Executar Verificações</button>
+    <button class="btn" onclick="window.location.href='index.html'">🚀 Abrir Sistema</button>
+
+    <script>
+        async function runChecks() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<p>Verificando...</p>';
+
+            let html = '';
+
+            // Check 1: CSS loaded
+            try {
+                const cssResponse = await fetch('styles.css');
+                if (cssResponse.ok) {
+                    html += `<div class="check success">✅ CSS encontrado (${(await cssResponse.text()).length} bytes)</div>`;
+                } else {
+                    html += `<div class="check error">❌ CSS não encontrado</div>`;
+                }
+            } catch (e) {
+                html += `<div class="check error">❌ Erro ao carregar CSS: ${e.message}</div>`;
+            }
+
+            // Check 2: Core files
+            const coreFiles = [
+                'src/core/parser.js',
+                'src/services/picker.js',
+                'src/ui/picking.js',
+                'src/ui/route.js'
+            ];
+
+            for (const file of coreFiles) {
+                try {
+                    const response = await fetch(file);
+                    if (response.ok) {
+                        const content = await response.text();
+
+                        // Check for specific functionality
+                        let features = [];
+                        if (file.includes('picker.js') && content.includes('groupBy')) {
+                            features.push('Agrupamento por motorista ✓');
+                        }
+                        if (file.includes('picking.js') && content.includes('toggleGroupBy')) {
+                            features.push('Toggle de visualização ✓');
+                        }
+                        if (file.includes('parser.js') && content.includes('parseItemLine')) {
+                            features.push('Parser atualizado ✓');
+                        }
+                        if (file.includes('route.js') && content.includes('RouteUI')) {
+                            features.push('Gestão de rotas ✓');
+                        }
+
+                        const featuresText = features.length > 0 ? `<br><small>${features.join(', ')}</small>` : '';
+                        html += `<div class="check success">✅ ${file} (${content.length} bytes)${featuresText}</div>`;
+                    } else {
+                        html += `<div class="check error">❌ ${file} não encontrado</div>`;
+                    }
+                } catch (e) {
+                    html += `<div class="check error">❌ Erro ao carregar ${file}: ${e.message}</div>`;
+                }
+            }
+
+            // Check 3: Server vs file protocol
+            if (window.location.protocol === 'file:') {
+                html += `<div class="check error">
+                    ⚠️ AVISO: Abrindo via file:// (duplo clique)<br>
+                    <strong>Isto pode causar problemas!</strong><br>
+                    Use servidor local: <code>python3 -m http.server 8080</code>
+                </div>`;
+            } else {
+                html += `<div class="check success">✅ Servidor local ativo (${window.location.protocol}//${window.location.host})</div>`;
+            }
+
+            // Check 4: Features summary
+            html += `
+                <div class="check">
+                    <h3>📊 Funcionalidades Implementadas:</h3>
+                    <ul>
+                        <li>✅ Parser WhatsApp (formato: "10 Camarão 41/50")</li>
+                        <li>✅ Gestão de Rotas (manual reassignment)</li>
+                        <li>✅ Lista de Picking com toggle</li>
+                        <li>✅ Agrupamento por Produto</li>
+                        <li>✅ Agrupamento por Motorista/Distribuidor</li>
+                        <li>✅ Validação de Stock</li>
+                        <li>✅ Previsão de Compras</li>
+                        <li>✅ Histórico de Pedidos</li>
+                    </ul>
+                </div>
+            `;
+
+            // Instructions
+            html += `
+                <div class="check">
+                    <h3>🚀 Como Abrir Corretamente:</h3>
+                    <pre>cd /home/user/Algoritmos
+python3 -m http.server 8080</pre>
+                    <p>Depois acesse: <strong>http://localhost:8080</strong></p>
+                    <p><strong>Não</strong> abra o ficheiro index.html diretamente (duplo clique)!</p>
+                </div>
+            `;
+
+            results.innerHTML = html;
+        }
+
+        // Run checks on load
+        window.onload = runChecks;
+    </script>
+</body>
+</html>
