@@ -13,6 +13,33 @@ class PickingUI {
         this.refresh();
     }
 
+    /**
+     * Get deterministic color for distributor based on initial
+     * PREVENTS MIXED PICKING: Same distributor always gets same color
+     */
+    getDistributorColor(distributorInitial) {
+        const initial = (distributorInitial || 'A').toUpperCase().charAt(0);
+        const colorMap = {
+            'A': '#ec4899', 'B': '#3b82f6', 'C': '#10b981', 'D': '#f59e0b',
+            'E': '#8b5cf6', 'F': '#ef4444', 'G': '#06b6d4', 'H': '#84cc16',
+            'I': '#f97316', 'J': '#f59e0b', 'K': '#14b8a6', 'L': '#a855f7',
+            'M': '#2563eb', 'N': '#16a34a', 'O': '#ea580c', 'P': '#10b981',
+            'Q': '#0891b2', 'R': '#65a30d', 'S': '#c026d3', 'T': '#0284c7'
+        };
+        return colorMap[initial] || '#6b7280'; // Default gray
+    }
+
+    /**
+     * Get distributor icon based on initial
+     */
+    getDistributorIcon(distributorInitial) {
+        const iconMap = {
+            'J': '🚚', 'M': '🚙', 'P': '🚐', 'A': '🛻',
+            'B': '🚗', 'C': '🚕', 'D': '🚓', 'E': '🚖'
+        };
+        return iconMap[distributorInitial] || '🚚';
+    }
+
     initializeElements() {
         this.container = document.getElementById('pickingListContainer');
         this.dateFilter = document.getElementById('pickingDateFilter');
@@ -87,6 +114,9 @@ class PickingUI {
             return;
         }
 
+        // MIXED PICKING PREVENTION: Check if multiple distributors
+        const hasMultipleDistributors = pickingList.summary.distributors.length > 1;
+
         let html = `
             <!-- RULE 4: Total boxes banner at top - impossible to miss -->
             <div class="total-boxes-banner">
@@ -94,6 +124,18 @@ class PickingUI {
                 <div class="value">${pickingList.summary.totalBoxes} CAIXAS</div>
                 <div class="subtitle">${pickingList.summary.totalKg.toFixed(1)} kg total | ${pickingList.summary.totalOrders} pedidos | ${pickingList.summary.distributors.length} distribuidores</div>
             </div>
+
+            <!-- MIXED PICKING WARNING: Alert when multiple distributors in same list -->
+            ${hasMultipleDistributors ? `
+                <div class="multi-distributor-warning">
+                    <div class="warning-icon">⚠️</div>
+                    <div class="warning-title">ATENÇÃO: MÚLTIPLOS DISTRIBUIDORES</div>
+                    <div class="warning-text">
+                        Esta lista contém ${pickingList.summary.distributors.length} distribuidores diferentes.<br>
+                        <strong>Separe os produtos por cor/motorista para evitar mistura!</strong>
+                    </div>
+                </div>
+            ` : ''}
 
             <div class="picking-summary" style="background: #f1f5f9; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
                 <h3 style="margin-top: 0;">📊 Resumo</h3>
@@ -173,8 +215,12 @@ class PickingUI {
                     // RULE 4: Running total
                     runningTotal += order.quantity;
 
+                    // MIXED PICKING PREVENTION: Color-code by distributor
+                    const distInitial = order.distributorInitial || dist.distributorInitial || 'Z';
+                    const distColor = this.getDistributorColor(distInitial);
+
                     html += `
-                        <tr data-item-number="${itemNumber}">
+                        <tr data-item-number="${itemNumber}" data-distributor-initial="${distInitial}" style="border-left-color: ${distColor};">
                             <td class="checkbox-cell">
                                 <input type="checkbox" class="pick-checkbox" onchange="updatePickingProgress()">
                             </td>
@@ -184,7 +230,7 @@ class PickingUI {
                                     ${product.name}
                                 </td>
                             ` : ''}
-                            <td><strong>${dist.distributor}</strong></td>
+                            <td><strong style="color: ${distColor};">${dist.distributor}</strong></td>
                             <td>${order.restaurant}</td>
                             <td class="quantity-cell">
                                 <div style="font-size: 2.5rem; font-weight: 900;">${order.quantity}</div>
@@ -239,21 +285,6 @@ class PickingUI {
                     <span>${zone.name}</span>
                     <span>${zoneData.totalBoxes} caixas (${zoneData.totalKg.toFixed(1)} kg)</span>
                 </div>
-
-                <table class="picking-table">
-                    <thead>
-                        <tr>
-                            <th class="checkbox-cell">✓</th>
-                            <th style="width: 5%;">#</th>
-                            <th style="width: 18%;">Motorista</th>
-                            <th style="width: 25%;">Produto</th>
-                            <th style="width: 25%;">Restaurante</th>
-                            <th style="width: 12%;">Quantidade</th>
-                            <th style="width: 7%;">Kg</th>
-                            <th style="width: 8%;">Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
         `;
 
         // RULE 3: Sequential numbering across all items in zone
@@ -263,34 +294,64 @@ class PickingUI {
             (sum, d) => sum + d.products.reduce((s, p) => s + p.orders.length, 0), 0
         );
 
-        zoneData.distributors.forEach(dist => {
+        zoneData.distributors.forEach((dist, distIndex) => {
+            const distColor = this.getDistributorColor(dist.distributorInitial);
+            const distIcon = this.getDistributorIcon(dist.distributorInitial);
+
+            // Add separator between distributors (except before first)
+            if (distIndex > 0) {
+                html += `
+                    </tbody>
+                    </table>
+                    <div class="distributor-section-separator">
+                        ⬇️ PRÓXIMO DISTRIBUIDOR ⬇️
+                    </div>
+                `;
+            }
+
+            // DISTRIBUTOR HEADER: Lock visual identity per distributor
+            html += `
+                <div class="distributor-header" style="background: ${distColor};">
+                    <div>
+                        <div class="dist-label">Rota / Distribuidor</div>
+                        <div class="dist-name">${dist.distributor}</div>
+                        <div class="dist-info">${dist.totalBoxes} caixas | ${dist.totalKg.toFixed(1)} kg</div>
+                    </div>
+                    <div class="dist-icon">${distIcon}</div>
+                </div>
+
+                <table class="picking-table">
+                    <thead>
+                        <tr>
+                            <th class="checkbox-cell">✓</th>
+                            <th style="width: 5%;">#</th>
+                            <th style="width: 25%;">Produto</th>
+                            <th style="width: 30%;">Restaurante</th>
+                            <th style="width: 12%;">Quantidade</th>
+                            <th style="width: 8%;">Kg</th>
+                            <th style="width: 10%;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
             // Calculate rowspan including product subtotal rows
             const distRowSpan = dist.products.reduce((sum, p) => sum + p.orders.length + 1, 0); // +1 for subtotal row per product
 
             dist.products.forEach((product, productIndex) => {
                 product.orders.forEach((order, orderIndex) => {
-                    const isFirstRowOfDist = productIndex === 0 && orderIndex === 0;
                     const totalKg = (order.quantity * product.kgPerBox).toFixed(1);
 
                     // RULE 4: Running total
                     runningTotal += order.quantity;
 
+                    // MIXED PICKING PREVENTION: Color-code by distributor
                     html += `
-                        <tr data-item-number="${itemNumber}">
+                        <tr data-item-number="${itemNumber}" data-distributor-initial="${dist.distributorInitial}" style="border-left-color: ${distColor};">
                             <td class="checkbox-cell">
                                 <input type="checkbox" class="pick-checkbox" onchange="updatePickingProgress()">
                             </td>
                             <td class="item-number">${itemNumber}/${totalItemsInZone}</td>
-                            ${isFirstRowOfDist ? `
-                                <td rowspan="${distRowSpan}" style="font-weight: bold; background: #f8fafc; vertical-align: top; padding-top: 15px;">
-                                    <div style="font-size: 1.1rem;">${dist.distributor}</div>
-                                    <div style="font-size: 0.9rem; color: #64748b; margin-top: 5px;">
-                                        ${dist.totalBoxes} caixas<br>
-                                        ${dist.totalKg.toFixed(1)} kg
-                                    </div>
-                                </td>
-                            ` : ''}
-                            <td>${product.name}</td>
+                            <td><strong>${product.name}</strong></td>
                             <td>${order.restaurant}</td>
                             <td class="quantity-cell">
                                 <div style="font-size: 2.5rem; font-weight: 900;">${order.quantity}</div>
@@ -308,13 +369,13 @@ class PickingUI {
                 const productTotalKg = (productTotalQty * product.kgPerBox).toFixed(1);
 
                 html += `
-                    <tr class="total-row" style="border-top: 2px solid #0ea5e9;">
-                        <td colspan="5" style="text-align: right; padding-right: 10px; font-style: italic;">Subtotal ${product.name}:</td>
+                    <tr class="total-row" style="border-top: 2px solid ${distColor};">
+                        <td colspan="4" style="text-align: right; padding-right: 10px; font-style: italic;">Subtotal ${product.name}:</td>
                         <td class="quantity-cell">
-                            <div style="font-size: 1.5rem; font-weight: 900; color: #0369a1;">${productTotalQty}</div>
-                            <div style="font-size: 0.8rem; color: #0369a1;">CAIXAS</div>
+                            <div style="font-size: 1.5rem; font-weight: 900; color: ${distColor};">${productTotalQty}</div>
+                            <div style="font-size: 0.8rem; color: ${distColor};">CAIXAS</div>
                         </td>
-                        <td style="text-align: center; color: #0369a1;">${productTotalKg}</td>
+                        <td style="text-align: center; color: ${distColor}; font-weight: bold;">${productTotalKg}</td>
                         <td></td>
                     </tr>
                 `;
@@ -322,13 +383,13 @@ class PickingUI {
 
             // Total row for distributor
             html += `
-                <tr class="total-row">
-                    <td colspan="5" style="text-align: right; font-weight: bold;">TOTAL ${dist.distributor}:</td>
+                <tr class="total-row" style="background: ${distColor}20;">
+                    <td colspan="4" style="text-align: right; font-weight: bold;">TOTAL ${dist.distributor}:</td>
                     <td class="quantity-cell">
-                        <div style="font-size: 2rem; font-weight: 900;">${dist.totalBoxes}</div>
-                        <div style="font-size: 0.8rem; color: #92400e;">CAIXAS</div>
+                        <div style="font-size: 2rem; font-weight: 900; color: ${distColor};">${dist.totalBoxes}</div>
+                        <div style="font-size: 0.8rem; color: ${distColor};">CAIXAS</div>
                     </td>
-                    <td style="text-align: center; font-weight: bold;">${dist.totalKg.toFixed(1)}</td>
+                    <td style="text-align: center; font-weight: bold; color: ${distColor};">${dist.totalKg.toFixed(1)}</td>
                     <td></td>
                 </tr>
             `;

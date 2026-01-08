@@ -470,6 +470,138 @@ body {
     text-align: center;
 }
 
+/* ========================================
+   DISTRIBUTOR SEPARATION & COLOR CODING
+   ======================================== */
+
+/* Deterministic color system - each distributor gets consistent color */
+:root {
+    --dist-color-A: #ec4899;  /* Pink */
+    --dist-color-B: #3b82f6;  /* Blue */
+    --dist-color-C: #10b981;  /* Green */
+    --dist-color-D: #f59e0b;  /* Orange */
+    --dist-color-E: #8b5cf6;  /* Purple */
+    --dist-color-F: #ef4444;  /* Red */
+    --dist-color-G: #06b6d4;  /* Cyan */
+    --dist-color-H: #84cc16;  /* Lime */
+    --dist-color-I: #f97316;  /* Orange-Red */
+    --dist-color-J: #f59e0b;  /* Amber - João */
+    --dist-color-K: #14b8a6;  /* Teal */
+    --dist-color-L: #a855f7;  /* Violet */
+    --dist-color-M: #2563eb;  /* Blue - Maria */
+    --dist-color-N: #16a34a;  /* Green */
+    --dist-color-O: #ea580c;  /* Orange */
+    --dist-color-P: #10b981;  /* Green - Paulo */
+    --dist-color-Q: #0891b2;  /* Cyan */
+    --dist-color-R: #65a30d;  /* Lime */
+    --dist-color-S: #c026d3;  /* Fuchsia */
+    --dist-color-T: #0284c7;  /* Sky */
+}
+
+/* Sticky distributor header - always visible at top */
+.distributor-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: 1.5rem 2rem;
+    margin-bottom: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+}
+
+.distributor-header .dist-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.9;
+}
+
+.distributor-header .dist-name {
+    font-size: 2rem;
+    font-weight: 900;
+    margin: 0.25rem 0;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+
+.distributor-header .dist-info {
+    font-size: 0.95rem;
+    opacity: 0.9;
+}
+
+.distributor-header .dist-icon {
+    font-size: 3rem;
+}
+
+/* Multi-distributor warning banner */
+.multi-distributor-warning {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    border: 4px solid #dc2626;
+    border-radius: 12px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(220, 38, 38, 0.2);
+    animation: pulse-warning 2s ease-in-out infinite;
+}
+
+@keyframes pulse-warning {
+    0%, 100% { box-shadow: 0 4px 6px rgba(220, 38, 38, 0.2); }
+    50% { box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4); }
+}
+
+.multi-distributor-warning .warning-icon {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+}
+
+.multi-distributor-warning .warning-title {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: #991b1b;
+    margin-bottom: 0.5rem;
+}
+
+.multi-distributor-warning .warning-text {
+    font-size: 1.1rem;
+    color: #7f1d1d;
+    font-weight: 600;
+}
+
+/* Visual separator between distributor sections */
+.distributor-section-separator {
+    height: 3rem;
+    background: repeating-linear-gradient(
+        45deg,
+        #fef3c7,
+        #fef3c7 10px,
+        #fde68a 10px,
+        #fde68a 20px
+    );
+    border-top: 4px solid #f59e0b;
+    border-bottom: 4px solid #f59e0b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 1.2rem;
+    color: #92400e;
+    margin: 2rem 0;
+}
+
+/* Row color coding - left border accent per distributor */
+.picking-table tbody tr[data-distributor-initial] {
+    border-left: 6px solid;
+}
+
+/* ========================================
+   END DISTRIBUTOR SEPARATION
+   ======================================== */
+
 /* RULE 4: Total boxes banner at top */
 .total-boxes-banner {
     background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
