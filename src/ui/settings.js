@@ -85,6 +85,9 @@ class SettingsUI {
             case 'zones':
                 this.displayZones();
                 break;
+            case 'import-json':
+                this.displayJSONImport();
+                break;
         }
     }
 
@@ -1167,5 +1170,438 @@ class SettingsUI {
 
     cancelCustomerForm() {
         document.getElementById('customerFormContainer').innerHTML = '';
+    }
+
+    // =============================================
+    // JSON IMPORT FUNCTIONALITY
+    // =============================================
+
+    displayJSONImport() {
+        let html = `
+            <div style="max-width: 800px; margin: 0 auto;">
+                <h3>📥 Importar Dados JSON</h3>
+                <p style="color: #64748b; margin-bottom: 30px;">
+                    Importe produtos e clientes em formato JSON. Os dados serão automaticamente validados e mesclados com os dados existentes.
+                </p>
+
+                <!-- Products JSON Import -->
+                <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                    <h4 style="margin-top: 0;">📦 Importar Produtos</h4>
+                    <p style="font-size: 0.9rem; color: #64748b;">
+                        Formato JSON esperado: array de objectos com campos obrigatórios:<br>
+                        <code style="background: #fff; padding: 2px 6px; border-radius: 4px;">sku, name, zone, currentStock, kgPerBox, boxesPerPallet, reorderPoint, supplier</code><br>
+                        Campo opcional: <code style="background: #fff; padding: 2px 6px; border-radius: 4px;">aliases</code> (array de strings)
+                    </p>
+                    <div style="margin: 15px 0;">
+                        <input type="file" id="productsJsonFile" accept=".json" style="margin-bottom: 10px;">
+                        <button onclick="settingsUI.previewProductsJSON()" class="btn-secondary" style="margin-right: 10px;">👁️ Pré-visualizar</button>
+                        <button onclick="settingsUI.importProductsJSON()" class="btn-success">✅ Importar Produtos</button>
+                    </div>
+                    <div id="productsJsonPreview" style="margin-top: 15px;"></div>
+                </div>
+
+                <!-- Customers JSON Import -->
+                <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                    <h4 style="margin-top: 0;">👥 Importar Clientes</h4>
+                    <p style="font-size: 0.9rem; color: #64748b;">
+                        Formato JSON esperado: array de objectos com campos obrigatórios:<br>
+                        <code style="background: #fff; padding: 2px 6px; border-radius: 4px;">name, distributor, salesRep</code>
+                    </p>
+                    <div style="margin: 15px 0;">
+                        <input type="file" id="customersJsonFile" accept=".json" style="margin-bottom: 10px;">
+                        <button onclick="settingsUI.previewCustomersJSON()" class="btn-secondary" style="margin-right: 10px;">👁️ Pré-visualizar</button>
+                        <button onclick="settingsUI.importCustomersJSON()" class="btn-success">✅ Importar Clientes</button>
+                    </div>
+                    <div id="customersJsonPreview" style="margin-top: 15px;"></div>
+                </div>
+
+                <!-- Example JSON Templates -->
+                <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; border: 2px solid #0ea5e9;">
+                    <h4 style="margin-top: 0; color: #0369a1;">📋 Exemplo de Formato JSON</h4>
+
+                    <details style="margin-bottom: 15px;">
+                        <summary style="cursor: pointer; font-weight: 600; color: #0369a1;">Exemplo: Produtos JSON</summary>
+                        <pre style="background: #fff; padding: 15px; border-radius: 4px; overflow-x: auto; font-size: 0.85rem; margin-top: 10px;"><code>[
+  {
+    "sku": "CAM-41-50",
+    "name": "Camarão 41/50",
+    "aliases": ["Camarão 41-50", "Shrimp 41/50", "41/50"],
+    "zone": "FROZEN_SEAFOOD",
+    "currentStock": 150,
+    "kgPerBox": 2.5,
+    "boxesPerPallet": 60,
+    "reorderPoint": 50,
+    "supplier": "FreshSea Import"
+  },
+  {
+    "sku": "ARR-SUSHI",
+    "name": "Arroz Sushi",
+    "aliases": ["Sushi Rice", "Rice Sushi"],
+    "zone": "DRY_GOODS",
+    "currentStock": 200,
+    "kgPerBox": 5,
+    "boxesPerPallet": 40,
+    "reorderPoint": 30,
+    "supplier": "Asia Foods"
+  }
+]</code></pre>
+                    </details>
+
+                    <details>
+                        <summary style="cursor: pointer; font-weight: 600; color: #0369a1;">Exemplo: Clientes JSON</summary>
+                        <pre style="background: #fff; padding: 15px; border-radius: 4px; overflow-x: auto; font-size: 0.85rem; margin-top: 10px;"><code>[
+  {
+    "name": "Restaurante Dragon",
+    "distributor": "João",
+    "salesRep": "Carlos Silva"
+  },
+  {
+    "name": "Sushi Palace",
+    "distributor": "Maria",
+    "salesRep": "Jorge Santos"
+  }
+]</code></pre>
+                    </details>
+                </div>
+            </div>
+        `;
+
+        this.settingsContent.innerHTML = html;
+    }
+
+    // Validate Products JSON structure
+    validateProductsJSON(data) {
+        const errors = [];
+
+        if (!Array.isArray(data)) {
+            return { valid: false, errors: ['JSON deve ser um array de produtos'] };
+        }
+
+        const requiredFields = ['sku', 'name', 'zone', 'currentStock', 'kgPerBox', 'boxesPerPallet', 'reorderPoint', 'supplier'];
+        const validZones = ['FROZEN_SEAFOOD', 'FROZEN_MEAT', 'FROZEN_PRECOOKED', 'DRY_GOODS'];
+
+        data.forEach((product, index) => {
+            // Check required fields
+            requiredFields.forEach(field => {
+                if (product[field] === undefined || product[field] === null) {
+                    errors.push(`Produto ${index + 1}: campo "${field}" é obrigatório`);
+                }
+            });
+
+            // Validate zone
+            if (product.zone && !validZones.includes(product.zone)) {
+                errors.push(`Produto ${index + 1}: zona "${product.zone}" inválida. Zonas válidas: ${validZones.join(', ')}`);
+            }
+
+            // Validate numeric fields
+            ['currentStock', 'kgPerBox', 'boxesPerPallet', 'reorderPoint'].forEach(field => {
+                if (product[field] !== undefined && typeof product[field] !== 'number') {
+                    errors.push(`Produto ${index + 1}: campo "${field}" deve ser número`);
+                }
+            });
+
+            // Validate aliases if present
+            if (product.aliases && !Array.isArray(product.aliases)) {
+                errors.push(`Produto ${index + 1}: campo "aliases" deve ser array`);
+            }
+        });
+
+        return {
+            valid: errors.length === 0,
+            errors: errors
+        };
+    }
+
+    // Validate Customers JSON structure
+    validateCustomersJSON(data) {
+        const errors = [];
+
+        if (!Array.isArray(data)) {
+            return { valid: false, errors: ['JSON deve ser um array de clientes'] };
+        }
+
+        const requiredFields = ['name', 'distributor', 'salesRep'];
+
+        data.forEach((customer, index) => {
+            requiredFields.forEach(field => {
+                if (!customer[field] || typeof customer[field] !== 'string' || customer[field].trim() === '') {
+                    errors.push(`Cliente ${index + 1}: campo "${field}" é obrigatório`);
+                }
+            });
+        });
+
+        return {
+            valid: errors.length === 0,
+            errors: errors
+        };
+    }
+
+    // Preview Products JSON
+    async previewProductsJSON() {
+        const fileInput = document.getElementById('productsJsonFile');
+        const file = fileInput.files[0];
+        const previewDiv = document.getElementById('productsJsonPreview');
+
+        if (!file) {
+            previewDiv.innerHTML = '<p style="color: #dc2626;">❌ Por favor selecione um ficheiro JSON</p>';
+            return;
+        }
+
+        try {
+            const text = await file.text();
+            const data = JSON.parse(text);
+
+            const validation = this.validateProductsJSON(data);
+
+            if (!validation.valid) {
+                previewDiv.innerHTML = `
+                    <div style="background: #fee2e2; border: 2px solid #dc2626; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #991b1b; margin-top: 0;">❌ Erros de Validação</h4>
+                        <ul style="color: #7f1d1d; margin: 0;">
+                            ${validation.errors.map(err => `<li>${err}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+                return;
+            }
+
+            // Show preview
+            const previewProducts = data.slice(0, 5);
+            previewDiv.innerHTML = `
+                <div style="background: #d1fae5; border: 2px solid #10b981; padding: 15px; border-radius: 8px;">
+                    <h4 style="color: #065f46; margin-top: 0;">✅ JSON Válido - ${data.length} produtos encontrados</h4>
+                    <p style="color: #065f46; margin: 0 0 10px 0;">Pré-visualização (primeiros 5):</p>
+                    <table style="width: 100%; font-size: 0.85rem; background: white; border-radius: 4px; overflow: hidden;">
+                        <thead style="background: #10b981; color: white;">
+                            <tr>
+                                <th style="padding: 8px; text-align: left;">SKU</th>
+                                <th style="padding: 8px; text-align: left;">Nome</th>
+                                <th style="padding: 8px; text-align: left;">Zona</th>
+                                <th style="padding: 8px; text-align: right;">Stock</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${previewProducts.map(p => `
+                                <tr style="border-bottom: 1px solid #e5e7eb;">
+                                    <td style="padding: 8px;">${p.sku}</td>
+                                    <td style="padding: 8px;">${p.name}</td>
+                                    <td style="padding: 8px;">${p.zone}</td>
+                                    <td style="padding: 8px; text-align: right;">${p.currentStock}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    ${data.length > 5 ? `<p style="color: #065f46; margin: 10px 0 0 0; font-size: 0.85rem;">... e mais ${data.length - 5} produtos</p>` : ''}
+                </div>
+            `;
+        } catch (error) {
+            previewDiv.innerHTML = `
+                <div style="background: #fee2e2; border: 2px solid #dc2626; padding: 15px; border-radius: 8px;">
+                    <h4 style="color: #991b1b; margin-top: 0;">❌ Erro ao ler ficheiro</h4>
+                    <p style="color: #7f1d1d; margin: 0;">${error.message}</p>
+                </div>
+            `;
+        }
+    }
+
+    // Preview Customers JSON
+    async previewCustomersJSON() {
+        const fileInput = document.getElementById('customersJsonFile');
+        const file = fileInput.files[0];
+        const previewDiv = document.getElementById('customersJsonPreview');
+
+        if (!file) {
+            previewDiv.innerHTML = '<p style="color: #dc2626;">❌ Por favor selecione um ficheiro JSON</p>';
+            return;
+        }
+
+        try {
+            const text = await file.text();
+            const data = JSON.parse(text);
+
+            const validation = this.validateCustomersJSON(data);
+
+            if (!validation.valid) {
+                previewDiv.innerHTML = `
+                    <div style="background: #fee2e2; border: 2px solid #dc2626; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #991b1b; margin-top: 0;">❌ Erros de Validação</h4>
+                        <ul style="color: #7f1d1d; margin: 0;">
+                            ${validation.errors.map(err => `<li>${err}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+                return;
+            }
+
+            // Show preview
+            const previewCustomers = data.slice(0, 5);
+            previewDiv.innerHTML = `
+                <div style="background: #d1fae5; border: 2px solid #10b981; padding: 15px; border-radius: 8px;">
+                    <h4 style="color: #065f46; margin-top: 0;">✅ JSON Válido - ${data.length} clientes encontrados</h4>
+                    <p style="color: #065f46; margin: 0 0 10px 0;">Pré-visualização (primeiros 5):</p>
+                    <table style="width: 100%; font-size: 0.85rem; background: white; border-radius: 4px; overflow: hidden;">
+                        <thead style="background: #10b981; color: white;">
+                            <tr>
+                                <th style="padding: 8px; text-align: left;">Nome</th>
+                                <th style="padding: 8px; text-align: left;">Distribuidor</th>
+                                <th style="padding: 8px; text-align: left;">Vendedor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${previewCustomers.map(c => `
+                                <tr style="border-bottom: 1px solid #e5e7eb;">
+                                    <td style="padding: 8px;">${c.name}</td>
+                                    <td style="padding: 8px;">${c.distributor}</td>
+                                    <td style="padding: 8px;">${c.salesRep}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    ${data.length > 5 ? `<p style="color: #065f46; margin: 10px 0 0 0; font-size: 0.85rem;">... e mais ${data.length - 5} clientes</p>` : ''}
+                </div>
+            `;
+        } catch (error) {
+            previewDiv.innerHTML = `
+                <div style="background: #fee2e2; border: 2px solid #dc2626; padding: 15px; border-radius: 8px;">
+                    <h4 style="color: #991b1b; margin-top: 0;">❌ Erro ao ler ficheiro</h4>
+                    <p style="color: #7f1d1d; margin: 0;">${error.message}</p>
+                </div>
+            `;
+        }
+    }
+
+    // Import Products JSON
+    async importProductsJSON() {
+        const fileInput = document.getElementById('productsJsonFile');
+        const file = fileInput.files[0];
+
+        if (!file) {
+            alert('❌ Por favor selecione um ficheiro JSON');
+            return;
+        }
+
+        try {
+            const text = await file.text();
+            const data = JSON.parse(text);
+
+            // Validate
+            const validation = this.validateProductsJSON(data);
+            if (!validation.valid) {
+                alert('❌ Erros de validação:\n\n' + validation.errors.join('\n'));
+                return;
+            }
+
+            // Load existing products
+            const existingProducts = this.storage.loadProducts();
+            const existingSKUs = new Set(existingProducts.map(p => p.sku));
+
+            // Merge: skip duplicates, add new ones
+            let added = 0;
+            let skipped = 0;
+
+            data.forEach(productData => {
+                if (existingSKUs.has(productData.sku)) {
+                    skipped++;
+                } else {
+                    const product = new Product({
+                        ...productData,
+                        aliases: productData.aliases || [],
+                        notes: productData.notes || ''
+                    });
+                    existingProducts.push(product);
+                    added++;
+                }
+            });
+
+            // Save merged data
+            this.storage.saveProducts(existingProducts);
+
+            // Show result
+            const message = `✅ Importação concluída!\n\n` +
+                          `📦 Novos produtos adicionados: ${added}\n` +
+                          `⏭️ Produtos existentes (ignorados): ${skipped}\n` +
+                          `📊 Total de produtos: ${existingProducts.length}`;
+
+            alert(message);
+
+            // Clear file input and preview
+            fileInput.value = '';
+            document.getElementById('productsJsonPreview').innerHTML = '';
+
+            // Refresh if on products tab
+            if (this.currentTab === 'products') {
+                this.displayProducts();
+            }
+
+        } catch (error) {
+            alert(`❌ Erro ao importar JSON:\n\n${error.message}`);
+        }
+    }
+
+    // Import Customers JSON
+    async importCustomersJSON() {
+        const fileInput = document.getElementById('customersJsonFile');
+        const file = fileInput.files[0];
+
+        if (!file) {
+            alert('❌ Por favor selecione um ficheiro JSON');
+            return;
+        }
+
+        try {
+            const text = await file.text();
+            const data = JSON.parse(text);
+
+            // Validate
+            const validation = this.validateCustomersJSON(data);
+            if (!validation.valid) {
+                alert('❌ Erros de validação:\n\n' + validation.errors.join('\n'));
+                return;
+            }
+
+            // Load existing customers
+            const existingCustomers = this.storage.loadCustomers() || [];
+            const existingNames = new Set(existingCustomers.map(c => c.name.toLowerCase()));
+
+            // Merge: skip duplicates, add new ones
+            let added = 0;
+            let skipped = 0;
+
+            data.forEach(customerData => {
+                if (existingNames.has(customerData.name.toLowerCase())) {
+                    skipped++;
+                } else {
+                    existingCustomers.push({
+                        name: customerData.name,
+                        distributor: customerData.distributor,
+                        salesRep: customerData.salesRep
+                    });
+                    added++;
+                }
+            });
+
+            // Save merged data
+            this.storage.saveCustomers(existingCustomers);
+
+            // Show result
+            const message = `✅ Importação concluída!\n\n` +
+                          `👥 Novos clientes adicionados: ${added}\n` +
+                          `⏭️ Clientes existentes (ignorados): ${skipped}\n` +
+                          `📊 Total de clientes: ${existingCustomers.length}`;
+
+            alert(message);
+
+            // Clear file input and preview
+            fileInput.value = '';
+            document.getElementById('customersJsonPreview').innerHTML = '';
+
+            // Refresh if on customers tab
+            if (this.currentTab === 'customers') {
+                this.displayCustomers();
+            }
+
+        } catch (error) {
+            alert(`❌ Erro ao importar JSON:\n\n${error.message}`);
+        }
     }
 }
