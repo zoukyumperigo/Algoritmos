@@ -1,0 +1,53 @@
+{
+  "expo": {
+    "name": "Seafood Distribution",
+    "slug": "seafood-distribution-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/images/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0D1B2A"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.seafood.distribution",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "This app needs access to location for delivery navigation.",
+        "NSCameraUsageDescription": "This app needs camera access to take delivery proof photos."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#0D1B2A"
+      },
+      "package": "com.seafood.distribution",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "CAMERA"
+      ]
+    },
+    "plugins": [
+      "expo-notifications",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Seafood Distribution to use your location for delivery navigation."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Seafood Distribution to access your camera for delivery proof photos."
+        }
+      ]
+    ]
+  }
+}
