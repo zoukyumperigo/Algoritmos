@@ -100,30 +100,33 @@ class ImportUI {
     }
 
     processOrders(text) {
-        // Parse orders
-        const orders = this.parser.parse(text);
-
-        if (this.parser.hasErrors() && orders.length === 0) {
-            this.showErrors(this.parser.getErrors(), []);
-            return;
-        }
-
-        // Load existing data
+        // Load existing data first (needed for resilient parser)
         const products = this.storage.loadProducts();
         const distributors = this.storage.loadDistributors();
         const existingOrders = this.storage.loadOrders();
 
-        // Normalize orders
-        this.normalizer = new ProductNormalizer(products);
-        orders.forEach(order => this.normalizer.normalizeOrder(order, distributors));
+        // Use RESILIENT parser (NEVER blocks orders)
+        const result = this.parser.parseResilient(text, products, distributors);
+        const orders = result.orders;
 
-        // Validate orders
+        // Show global warnings if any
+        if (result.warnings && result.warnings.length > 0) {
+            console.warn('Resilient parser warnings:', result.warnings);
+        }
+
+        // Even if no orders, don't completely fail - show what we got
+        if (orders.length === 0) {
+            this.showErrors(['Nenhum pedido foi encontrado no texto'], []);
+            return;
+        }
+
+        // Validate orders (soft validation - warnings only)
         this.validator.validateOrders(orders, existingOrders);
 
         // Store current orders
         this.currentOrders = orders;
 
-        // Display results
+        // Display results with confidence indicators
         this.displayParsedOrders(orders);
     }
 
@@ -220,13 +223,48 @@ class ImportUI {
 
                     <div class="order-items">
                         <strong>Items:</strong>
-                        ${order.items.map(item => `
-                            <div class="order-item">
-                                • ${item.productName || item.productCode} - <strong>${item.quantity}</strong> caixas
-                                ${item.kgPerBox ? ` (${item.getTotalKg()} kg)` : ''}
-                                ${!item.isMapped ? ' <span style="color: red;">❌ NÃO MAPEADO</span>' : ''}
-                            </div>
-                        `).join('')}
+                        ${order.items.map(item => {
+                            // Confidence badge
+                            let confidenceBadge = '';
+                            let confidenceColor = '';
+
+                            if (item.confidence !== undefined) {
+                                if (item.confidence >= 80) {
+                                    confidenceColor = '#16a34a'; // green
+                                    confidenceBadge = '✓';
+                                } else if (item.confidence >= 50) {
+                                    confidenceColor = '#ea580c'; // orange
+                                    confidenceBadge = '⚠';
+                                } else {
+                                    confidenceColor = '#dc2626'; // red
+                                    confidenceBadge = '?';
+                                }
+                            }
+
+                            return `
+                                <div class="order-item" style="display: flex; align-items: center; gap: 8px;">
+                                    ${item.confidence !== undefined ? `
+                                        <span style="
+                                            background: ${confidenceColor};
+                                            color: white;
+                                            padding: 2px 6px;
+                                            border-radius: 4px;
+                                            font-size: 0.8rem;
+                                            font-weight: bold;
+                                            min-width: 40px;
+                                            text-align: center;
+                                        " title="Confidence: ${item.confidence}% (${item.matchLayer})">
+                                            ${confidenceBadge} ${item.confidence}%
+                                        </span>
+                                    ` : ''}
+                                    <span style="flex: 1;">
+                                        • ${item.productName || item.productCode} - <strong>${item.quantity}</strong> caixas
+                                        ${item.kgPerBox ? ` (${item.getTotalKg()} kg)` : ''}
+                                        ${!item.isMapped ? ' <span style="color: red;">❌ NÃO RECONHECIDO</span>' : ''}
+                                    </span>
+                                </div>
+                            `;
+                        }).join('')}
                     </div>
 
                     <div style="margin-top: 10px; font-weight: bold;">

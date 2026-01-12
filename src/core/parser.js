@@ -328,4 +328,77 @@ class WhatsAppParser {
     hasWarnings() {
         return this.warnings.length > 0;
     }
+
+    /**
+     * Parse using resilient parser (NEVER blocks orders)
+     * Uses multi-layer matching and always produces valid output
+     */
+    parseResilient(rawText, products, distributors) {
+        try {
+            const resilientParser = new ResilientOrderParser(products, distributors);
+            const result = resilientParser.parseWhatsAppOrders(rawText);
+
+            // Convert resilient templates to Order objects
+            const orders = [];
+
+            for (const template of result.orders) {
+                const order = new Order({
+                    distributorInitial: template.distributorInitial,
+                    distributorName: template.distributor,
+                    restaurantName: template.restaurant,
+                    items: [],
+                    rawText: rawText,
+                    timestamp: new Date()
+                });
+
+                // Add items
+                for (const item of template.items) {
+                    if (item.parsedQuantity) {
+                        const orderItem = new OrderItem({
+                            productCode: item.parsedText,
+                            productName: item.matchedProduct ? item.matchedProduct.name : item.parsedText,
+                            quantity: item.parsedQuantity,
+                            productSKU: item.matchedSku,
+                            zone: item.matchedProduct ? item.matchedProduct.zone : null,
+                            kgPerBox: item.matchedProduct ? item.matchedProduct.kgPerBox : 0,
+                            isMapped: item.matchLayer !== 'unknown',
+                            confidence: item.confidence,
+                            matchLayer: item.matchLayer
+                        });
+
+                        order.items.push(orderItem);
+
+                        // Add warnings as soft errors
+                        if (item.warnings && item.warnings.length > 0) {
+                            item.warnings.forEach(w => order.addWarning(w));
+                        }
+                    }
+                }
+
+                // Add distributor warning if exists
+                if (template.distributorConfidence < 95) {
+                    order.addWarning(`Distribuidor não reconhecido: "${template.distributorInitial}"`);
+                }
+
+                // Calculate totals
+                order.calculateTotals();
+
+                orders.push(order);
+            }
+
+            return {
+                orders: orders,
+                warnings: result.globalWarnings,
+                success: result.success
+            };
+        } catch (error) {
+            console.error('Resilient parser error:', error);
+            // Fallback to regular parser
+            return {
+                orders: this.parse(rawText),
+                warnings: [`Fallback to regular parser: ${error.message}`],
+                success: false
+            };
+        }
+    }
 }

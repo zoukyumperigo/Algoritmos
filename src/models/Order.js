@@ -175,7 +175,9 @@ class OrderItem {
         zone,
         kgPerBox = 0,
         stockAvailable = 0,
-        isMapped = false
+        isMapped = false,
+        confidence = 95,
+        matchLayer = 'exact'
     }) {
         this.productCode = productCode;
         this.productSKU = productSKU;
@@ -185,6 +187,8 @@ class OrderItem {
         this.kgPerBox = kgPerBox;
         this.stockAvailable = stockAvailable;
         this.isMapped = isMapped;
+        this.confidence = confidence; // 0-100 matching confidence
+        this.matchLayer = matchLayer; // 'exact', 'heuristic', 'unknown', 'error'
     }
 
     /**
