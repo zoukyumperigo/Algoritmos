@@ -30,9 +30,6 @@
             <button class="nav-btn active" data-view="import">📥 Importar Pedidos</button>
             <button class="nav-btn" data-view="route">🚚 Gestão de Rotas</button>
             <button class="nav-btn" data-view="picking">📋 Lista de Picking</button>
-            <button class="nav-btn" data-view="history">📊 Histórico</button>
-            <button class="nav-btn" data-view="forecast">📈 Previsão de Compras</button>
-            <button class="nav-btn" data-view="stock">📦 Stock</button>
         </nav>
 
         <!-- MAIN CONTENT AREA -->
@@ -126,47 +123,6 @@ Restaurant Golden Dragon
                 <div id="pickingListContainer" class="picking-list-container"></div>
             </section>
 
-            <!-- HISTORY VIEW -->
-            <section id="historyView" class="view">
-                <div class="view-header">
-                    <h2>Histórico de Pedidos</h2>
-                    <div class="history-filters">
-                        <input type="date" id="dateFrom" class="filter-input">
-                        <input type="date" id="dateTo" class="filter-input">
-                        <select id="restaurantFilter" class="filter-input">
-                            <option value="">Todos os Restaurantes</option>
-                        </select>
-                        <select id="distributorFilter" class="filter-input">
-                            <option value="">Todos os Distribuidores</option>
-                        </select>
-                        <select id="productFilter" class="filter-input">
-                            <option value="">Todos os Produtos</option>
-                        </select>
-                        <button id="applyHistoryFilter" class="btn-primary">🔍 Filtrar</button>
-                        <button id="exportHistoryBtn" class="btn-secondary">📊 Exportar CSV</button>
-                    </div>
-                </div>
-                <div id="historyContainer" class="history-container"></div>
-            </section>
-
-            <!-- FORECAST VIEW -->
-            <section id="forecastView" class="view">
-                <div class="view-header">
-                    <h2>Previsão de Compras</h2>
-                    <p class="help-text">Análise das últimas 4 semanas</p>
-                </div>
-                <div id="forecastContainer" class="forecast-container"></div>
-            </section>
-
-            <!-- STOCK VIEW -->
-            <section id="stockView" class="view">
-                <div class="view-header">
-                    <h2>Gestão de Stock</h2>
-                    <button id="addProductBtn" class="btn-primary">➕ Adicionar Produto</button>
-                </div>
-                <div id="stockContainer" class="stock-container"></div>
-            </section>
-
         </main>
 
         <!-- SETTINGS MODAL -->
@@ -208,9 +164,6 @@ Restaurant Golden Dragon
     <script src="src/ui/import.js"></script>
     <script src="src/ui/route.js"></script>
     <script src="src/ui/picking.js"></script>
-    <script src="src/ui/history.js"></script>
-    <script src="src/ui/forecast.js"></script>
-    <script src="src/ui/stock.js"></script>
     <script src="src/ui/settings.js"></script>
     <script src="app.js"></script>
 </body>

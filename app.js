@@ -16,9 +16,6 @@ const App = {
     importUI: null,
     routeUI: null,
     pickingUI: null,
-    historyUI: null,
-    forecastUI: null,
-    stockUI: null,
     settingsUI: null,
 
     // Current state
@@ -82,20 +79,6 @@ async function initializeApp() {
             App.picker
         );
 
-        App.historyUI = new HistoryUI(
-            App.storage,
-            App.analytics
-        );
-
-        App.forecastUI = new ForecastUI(
-            App.storage,
-            App.analytics
-        );
-
-        App.stockUI = new StockUI(
-            App.storage
-        );
-
         App.settingsUI = new SettingsUI(
             App.storage
         );
@@ -103,8 +86,6 @@ async function initializeApp() {
         // Make UI instances globally accessible for cross-module communication
         window.routeUI = App.routeUI;
         window.pickingUI = App.pickingUI;
-        window.forecastUI = App.forecastUI;
-        window.stockUI = App.stockUI;
         window.settingsUI = App.settingsUI;
 
         // Initialize navigation
@@ -170,15 +151,6 @@ function switchView(viewName) {
         case 'picking':
             App.pickingUI.refresh();
             break;
-        case 'history':
-            App.historyUI.refresh();
-            break;
-        case 'forecast':
-            App.forecastUI.refresh();
-            break;
-        case 'stock':
-            App.stockUI.refresh();
-            break;
     }
 }
 
@@ -228,8 +200,6 @@ function filterBySalesRep(salesRepId) {
     // For now, just refresh views
     if (App.currentView === 'picking') {
         App.pickingUI.refresh();
-    } else if (App.currentView === 'history') {
-        App.historyUI.refresh();
     }
 }
 
@@ -241,8 +211,6 @@ function clearSalesRepFilter() {
 
     if (App.currentView === 'picking') {
         App.pickingUI.refresh();
-    } else if (App.currentView === 'history') {
-        App.historyUI.refresh();
     }
 }
 
