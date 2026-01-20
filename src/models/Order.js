@@ -116,7 +116,15 @@ class Order {
      * Get order date (YYYY-MM-DD)
      */
     getDate() {
-        return this.timestamp.split('T')[0];
+        // Handle both Date objects and ISO strings
+        if (this.timestamp instanceof Date) {
+            return this.timestamp.toISOString().split('T')[0];
+        }
+        if (typeof this.timestamp === 'string') {
+            return this.timestamp.split('T')[0];
+        }
+        // Fallback to today's date
+        return new Date().toISOString().split('T')[0];
     }
 
     /**
