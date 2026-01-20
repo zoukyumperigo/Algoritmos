@@ -19,15 +19,34 @@ class SettingsUI {
         this.closeBtn = this.modal?.querySelector('.close');
         this.settingsContent = document.getElementById('settingsContent');
         this.settingsTabs = document.querySelectorAll('.settings-tab');
+
+        // Debug logging
+        console.log('SettingsUI: Initializing elements...');
+        console.log('- Modal:', this.modal ? '✓ Found' : '✗ NOT FOUND');
+        console.log('- Settings Button:', this.settingsBtn ? '✓ Found' : '✗ NOT FOUND');
+        console.log('- Close Button:', this.closeBtn ? '✓ Found' : '✗ NOT FOUND');
+        console.log('- Settings Content:', this.settingsContent ? '✓ Found' : '✗ NOT FOUND');
+        console.log('- Settings Tabs:', this.settingsTabs.length, 'tabs found');
     }
 
     attachEventListeners() {
+        console.log('SettingsUI: Attaching event listeners...');
+
         if (this.settingsBtn) {
-            this.settingsBtn.addEventListener('click', () => this.open());
+            this.settingsBtn.addEventListener('click', () => {
+                console.log('SettingsUI: Settings button clicked!');
+                this.open();
+            });
+            console.log('- Settings button click listener attached ✓');
+        } else {
+            console.warn('- Settings button not found, listener not attached');
         }
 
         if (this.closeBtn) {
             this.closeBtn.addEventListener('click', () => this.close());
+            console.log('- Close button click listener attached ✓');
+        } else {
+            console.warn('- Close button not found');
         }
 
         if (this.modal) {
@@ -36,6 +55,7 @@ class SettingsUI {
                     this.close();
                 }
             });
+            console.log('- Modal background click listener attached ✓');
         }
 
         this.settingsTabs.forEach(tab => {
@@ -44,10 +64,17 @@ class SettingsUI {
                 this.switchTab(tabName);
             });
         });
+        console.log(`- ${this.settingsTabs.length} tab click listeners attached ✓`);
     }
 
     open() {
+        console.log('SettingsUI: Opening modal...');
+        if (!this.modal) {
+            console.error('SettingsUI: Cannot open - modal element is null!');
+            return;
+        }
         this.modal.classList.add('active');
+        console.log('SettingsUI: Modal active class added');
         this.switchTab('products');
     }
 
