@@ -270,9 +270,9 @@ const SAMPLE_PRODUCTS = [
         notes: ''
     },
     {
-        sku: 'AMEIJOA C/CASCA BRANCA 10*1',
-        name: 'AMEIJOA C/CASCA BRANCA 10*1',
-        aliases: ['AMEIJOA BRANCA', 'White Shell Clam', 'Ameijoa 10*1', 'ameijoa branca'],
+        sku: 'AMEIJOA C/CASCA BRANCA 101',
+        name: 'AMEIJOA C/CASCA BRANCA 101',
+        aliases: ['AMEIJOA BRANCA', 'White Shell Clam', 'Ameijoa 101', 'ameijoa branca'],
         zone: 'FROZEN_SEAFOOD',
         currentStock: 0,
         kgPerBox: 10,
@@ -486,8 +486,8 @@ const SAMPLE_PRODUCTS = [
         notes: ''
     },
     {
-        sku: 'CAMARAO BT INTEIRO  4/6',
-        name: 'CAMARAO BT INTEIRO  4/6',
+        sku: 'CAMARAO BT INTEIRO 4/6',
+        name: 'CAMARAO BT INTEIRO 4/6',
         aliases: ['CAM BT 4/6', 'Tiger Shrimp 4/6', 'Black Tiger', 'camarao bt 4/6'],
         zone: 'FROZEN_SEAFOOD',
         currentStock: 0,
