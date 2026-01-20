@@ -20,7 +20,7 @@ const SAMPLE_PRODUCTS = [
     {
         sku: 'Camarão S/Cabeça 41/50',
         name: 'Camarão S/Cabeça 41/50',
-        aliases: ['CAM S/C 41/50', 'HLSO 41/50', 'Camarão s/ cabeça', 'camarao 41/50'],
+        aliases: ['CAM S/C 41/50', 'HLSO 41/50', 'Camarão s/ cabeça', 'camarao 41/50', '41/50'],
         zone: 'FROZEN_SEAFOOD',
         currentStock: 0,
         kgPerBox: 20,
