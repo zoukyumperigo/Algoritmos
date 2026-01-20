@@ -131,8 +131,9 @@ class ResilientOrderParser {
             textWithoutQty = line.substring(qtyMatch[0].length);
         }
 
-        // Strip price if present (€, EUR, numbers at end)
-        const pricePattern = /\s*[\d,\.]+\s*€?\s*$/;
+        // Strip price if present (€, EUR, numbers with comma/decimal at end)
+        // More specific pattern to avoid stripping product codes like 41/50
+        const pricePattern = /\s+[\d]+[,\.][\d]+\s*€?\s*$|[\d]+\s*€\s*$/;
         const textWithoutPrice = textWithoutQty.replace(pricePattern, '').trim();
 
         return {
