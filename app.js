@@ -30,16 +30,16 @@ async function initializeApp() {
     console.log('🚀 Initializing Warehouse Management System...');
 
     try {
-        // Initialize sample data if needed
-        initializeSampleData();
-
-        // Initialize core services
+        // Initialize core services FIRST
         App.storage = new StorageService();
 
         // Initialize IndexedDB and load data into cache
         console.log('📦 Initializing database...');
         await App.storage.init();
         console.log('✅ Database initialized successfully!');
+
+        // NOW initialize sample data if needed (after storage is ready)
+        initializeSampleData();
 
         App.parser = new WhatsAppParser();
         App.validator = new OrderValidator({

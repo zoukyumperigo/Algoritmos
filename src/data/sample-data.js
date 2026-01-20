@@ -933,7 +933,13 @@ Restaurant Panda
 
 // ===== INITIALIZATION =====
 function initializeSampleData() {
-    const storage = new StorageService();
+    // Use the global App.storage that's already initialized
+    if (!window.App || !window.App.storage) {
+        console.error('Storage not initialized! Cannot load sample data.');
+        return;
+    }
+
+    const storage = window.App.storage;
 
     // Check if data already exists
     const existingProducts = storage.loadProducts();
@@ -962,5 +968,6 @@ function initializeSampleData() {
         console.log(`- ${salesReps.length} sales reps`);
     } else {
         console.log('Using existing warehouse data');
+        console.log(`- ${existingProducts.length} products already loaded`);
     }
 }
