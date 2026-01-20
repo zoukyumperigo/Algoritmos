@@ -1,478 +1,485 @@
 [
   {
-    "sku": "CAMARAO-20-30-VANNAMEI-P",
+    "sku": "CAMARAO 20/30 Vannamei P",
     "name": "CAMARAO 20/30 Vannamei P",
-    "aliases": ["Camarão S/Cabeça 41/50"],
+    "aliases": ["CAM 20/30", "Vannamei P", "Camarão 20/30", "camarao 20/30"],
     "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 2
+    "kgPerBox": 12
   },
   {
-    "sku": "TAMBORIL-SP-1000-1500",
-    "name": "TAMBORIL S/P 1000/1500 ENV NAMIBIA",
-    "aliases": [],
-    "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 10
-  },
-  {
-    "sku": "CAMARAO-SC-26-30",
-    "name": "Camarao S/C 26/30",
-    "aliases": [],
-    "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 2
-  },
-  {
-    "sku": "TENTACULOS-POTA-3-4-COVETE",
-    "name": "TENTACULOS POTA 3/4 COVETE",
-    "aliases": [],
-    "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 10
-  },
-  {
-    "sku": "PORCO-LOMBO-CONG",
-    "name": "PORCO LOMBO CONG",
-    "aliases": [],
-    "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 10
-  },
-  {
-    "sku": "TENTACULO-POTA",
-    "name": "TENTACULO POTA",
-    "aliases": [],
-    "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 10
-  },
-  {
-    "sku": "CAMARAO-COZIDO-40-60-VAN",
-    "name": "Camarão Cozido 40/60 Van",
-    "aliases": [],
-    "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 2
-  },
-  {
-    "sku": "MEXILHAO-1-2-CONCHA-NZ",
-    "name": "MEXILHAO 1/2 CONCHA N.Z",
-    "aliases": [],
-    "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 1
-  },
-  {
-    "sku": "LULA-LIMPA-20-40",
-    "name": "LULA LIMPA 20/40",
-    "aliases": [],
-    "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 2
-  },
-  {
-    "sku": "CAPRICHOS-MUSILLOS",
-    "name": "Caprichos / Musillos",
-    "aliases": [],
-    "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 10
-  },
-  {
-    "sku": "CAMARAO-30-40-INTEIRO",
-    "name": "Camarão 30/40 inteiro",
-    "aliases": [],
-    "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 2
-  },
-  {
-    "sku": "LINGUEIRAO",
-    "name": "LINGUEIRAO",
-    "aliases": [],
-    "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 1
-  },
-  {
-    "sku": "PESCADA-2C",
-    "name": "Pescada 2C",
-    "aliases": [],
-    "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 10
-  },
-  {
-    "sku": "PESCADA-2L",
-    "name": "Pescada 2L",
-    "aliases": [],
-    "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 10
-  },
-  {
-    "sku": "CARANGUEJO",
-    "name": "CARANGUEJO",
-    "aliases": [],
-    "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 10
-  },
-  {
-    "sku": "CAMARAO-40-50-INTVANNAMEI",
-    "name": "Camarão 40/50 int.vannamei",
-    "aliases": [],
-    "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 2
-  },
-  {
-    "sku": "LAGOSTA-BR-400-MARROCOS",
-    "name": "LAGOSTA BR/400 MARROCOS",
-    "aliases": [],
-    "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 5
-  },
-  {
-    "sku": "ARROZ-ITALIA-20KG",
-    "name": "ARROZ ITALIA 20 KG",
-    "aliases": [],
+    "sku": "Camarão S/Cabeça 41/50",
+    "name": "Camarão S/Cabeça 41/50",
+    "aliases": ["CAM S/C 41/50", "HLSO 41/50", "Camarão s/ cabeça", "camarao 41/50", "41/50"],
     "zone": "FROZEN_SEAFOOD",
     "kgPerBox": 20
   },
   {
-    "sku": "CAMARAO-SC-CABECA-21-25",
-    "name": "CAMARAO S/CABECA 21/25",
-    "aliases": [],
-    "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 2
-  },
-  {
-    "sku": "CAMARAO-COZIDO-20-30-VAN",
-    "name": "Camarão Cozido 20/30 Van",
-    "aliases": [],
-    "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 2
-  },
-  {
-    "sku": "CAMARAO-BT-INTEIRO-6-8",
-    "name": "CAMARAO BT INTEIRO 6/8",
-    "aliases": [],
-    "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 2
-  },
-  {
-    "sku": "AMEIJOA-CASCA-BRANCA-10-1",
-    "name": "AMEIJOA C/CASCA BRANCA 10*1",
-    "aliases": [],
+    "sku": "TAMBORIL S/P 1000/1500 ENV NAMIBIA",
+    "name": "TAMBORIL S/P 1000/1500 ENV NAMIBIA",
+    "aliases": ["MONK 1000/1500", "Tamboril Namíbia", "tamboril s/p"],
     "zone": "FROZEN_SEAFOOD",
     "kgPerBox": 1
   },
   {
-    "sku": "PATO-CONG-QTAMARINHA-SMIUDOS-25",
+    "sku": "Camarao S/C 26/30",
+    "name": "Camarao S/C 26/30",
+    "aliases": ["CAM S/C 26/30", "HLSO 26/30", "Camarão sem cabeça", "camarao 26/30"],
+    "zone": "FROZEN_SEAFOOD",
+    "kgPerBox": 20
+  },
+  {
+    "sku": "TENTACULOS POTA 3/4 COVETE",
+    "name": "TENTACULOS POTA 3/4 COVETE",
+    "aliases": ["TENT POTA 3/4", "Pota Covete", "Tentáculos 3/4", "pota covete"],
+    "zone": "FROZEN_SEAFOOD",
+    "kgPerBox": 1
+  },
+  {
+    "sku": "PORCO LOMBO CONG",
+    "name": "PORCO LOMBO CONG",
+    "aliases": ["LOMBO PORCO", "Porco Congelado", "Pork Loin", "porco lombo"],
+    "zone": "FROZEN_SEAFOOD",
+    "kgPerBox": 1
+  },
+  {
+    "sku": "TENTACULO POTA",
+    "name": "TENTACULO POTA",
+    "aliases": ["TENT POTA", "Tentáculos Pota", "Squid Tentacles", "pota tentaculo"],
+    "zone": "FROZEN_SEAFOOD",
+    "kgPerBox": 10
+  },
+  {
+    "sku": "Camarão Cozido 40/60 Van",
+    "name": "Camarão Cozido 40/60 Van",
+    "aliases": ["CAM COZ 40/60", "Cozido 40/60", "Cooked Shrimp 40/60"],
+    "zone": "FROZEN_SEAFOOD",
+    "kgPerBox": 5
+  },
+  {
+    "sku": "MEXILHAO 1/2 CONCHA N.Z",
+    "name": "MEXILHAO 1/2 CONCHA N.Z",
+    "aliases": ["MEXILHAO NZ", "Half Shell Mussel", "Mexilhão Meia Concha", "mexilhao nz"],
+    "zone": "FROZEN_SEAFOOD",
+    "kgPerBox": 12
+  },
+  {
+    "sku": "LULA LIMPA 20/40",
+    "name": "LULA LIMPA 20/40",
+    "aliases": ["LULA 20/40", "Clean Squid 20/40", "Lula Limpa", "lula 20/40"],
+    "zone": "FROZEN_SEAFOOD",
+    "kgPerBox": 10
+  },
+  {
+    "sku": "Caprichos / Muslitos",
+    "name": "Caprichos / Muslitos",
+    "aliases": ["MUSLITOS", "Caprichos Mar", "Patas Caranguejo", "muslitos"],
+    "zone": "FROZEN_SEAFOOD",
+    "kgPerBox": 6
+  },
+  {
+    "sku": "Camarao 30/40 inteiro",
+    "name": "Camarao 30/40 inteiro",
+    "aliases": ["CAM INT 30/40", "Whole Shrimp 30/40", "Camarão 30/40", "camarao inteiro"],
+    "zone": "FROZEN_SEAFOOD",
+    "kgPerBox": 20
+  },
+  {
+    "sku": "LINGUEIRAO",
+    "name": "LINGUEIRAO",
+    "aliases": ["RAZOR CLAM", "Lingueirão", "Canivetes", "lingueirao"],
+    "zone": "FROZEN_SEAFOOD",
+    "kgPerBox": 5
+  },
+  {
+    "sku": "Pescada 2C",
+    "name": "Pescada 2C",
+    "aliases": ["PESCADA 2C", "Hake 2C", "Pescada", "pescada 2c"],
+    "zone": "FROZEN_SEAFOOD",
+    "kgPerBox": 1
+  },
+  {
+    "sku": "Pescada 2L",
+    "name": "Pescada 2L",
+    "aliases": ["PESCADA 2L", "Hake 2L", "Pescada", "pescada 2l"],
+    "zone": "FROZEN_SEAFOOD",
+    "kgPerBox": 1
+  },
+  {
+    "sku": "CARANGUEIJO",
+    "name": "CARANGUEIJO",
+    "aliases": ["CRAB", "Caranguejo", "Sapateira", "carangueijo"],
+    "zone": "FROZEN_SEAFOOD",
+    "kgPerBox": 15
+  },
+  {
+    "sku": "Camarao 40/50 int.vannamei",
+    "name": "Camarao 40/50 int.vannamei",
+    "aliases": ["CAM 40/50 INT", "Vannamei 40/50", "Camarão Inteiro", "camarao 40/50"],
+    "zone": "FROZEN_SEAFOOD",
+    "kgPerBox": 20
+  },
+  {
+    "sku": "LAGOSTA 300/400 MARROCOS",
+    "name": "LAGOSTA 300/400 MARROCOS",
+    "aliases": ["LOBSTER 300/400", "Lagosta Marrocos", "lagosta 300/400"],
+    "zone": "FROZEN_SEAFOOD",
+    "kgPerBox": 12
+  },
+  {
+    "sku": "ARROZ ITALIA 20 KG",
+    "name": "ARROZ ITALIA 20 KG",
+    "aliases": ["ARROZ 20KG", "Arroz Sushi", "Italy Rice", "arroz italia"],
+    "zone": "FROZEN_SEAFOOD",
+    "kgPerBox": 1
+  },
+  {
+    "sku": "CAMARAO S/CABEÇA 21/25",
+    "name": "CAMARAO S/CABEÇA 21/25",
+    "aliases": ["CAM S/C 21/25", "HLSO 21/25", "Camarão 21/25", "camarao s/cabeça"],
+    "zone": "FROZEN_SEAFOOD",
+    "kgPerBox": 20
+  },
+  {
+    "sku": "Camarão Cozido 20/30 Van",
+    "name": "Camarão Cozido 20/30 Van",
+    "aliases": ["CAM COZ 20/30", "Cozido 20/30", "Cooked Shrimp 20/30"],
+    "zone": "FROZEN_SEAFOOD",
+    "kgPerBox": 6
+  },
+  {
+    "sku": "CAMARAO BT INTEIRO 6/8",
+    "name": "CAMARAO BT INTEIRO 6/8",
+    "aliases": ["CAM BT 6/8", "Tiger Shrimp 6/8", "Camarão Tigre 6/8", "camarao bt"],
+    "zone": "FROZEN_SEAFOOD",
+    "kgPerBox": 1
+  },
+  {
+    "sku": "AMEIJOA C/CASCA BRANCA 101",
+    "name": "AMEIJOA C/CASCA BRANCA 101",
+    "aliases": ["AMEIJOA BRANCA", "White Shell Clam", "Ameijoa 101", "ameijoa branca"],
+    "zone": "FROZEN_SEAFOOD",
+    "kgPerBox": 10
+  },
+  {
+    "sku": "PATO CONG. Qta.MARINHA S/MIUDOS 2.5",
     "name": "PATO CONG. Qta.MARINHA S/MIUDOS 2.5",
-    "aliases": [],
+    "aliases": ["PATO 2.5", "Duck No Giblets", "Pato Marinha", "pato cong"],
     "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 2.5
+    "kgPerBox": 15
   },
   {
-    "sku": "PERNA-TRASEIRO-FRANGO",
+    "sku": "Perna/Traseiro de Frango",
     "name": "Perna/Traseiro de Frango",
-    "aliases": [],
+    "aliases": ["PERNA FRANGO", "Chicken Leg", "Traseiro Frango", "perna frango"],
     "zone": "FROZEN_SEAFOOD",
     "kgPerBox": 10
   },
   {
-    "sku": "PATO-CONG-QTAMARINHA-SMIUDOS",
-    "name": "PATO CONG. Qta.MARINHA S/MIUDOS 14.40",
-    "aliases": [],
+    "sku": "PATO CONG. Qta.MARINHA S/MIUDOS",
+    "name": "PATO CONG. Qta.MARINHA S/MIUDOS",
+    "aliases": ["PATO MARINHA", "Duck", "Pato s/ Miúdos", "pato marinha"],
     "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 14.4
+    "kgPerBox": 14.40
   },
   {
-    "sku": "MASAGO-LARANJA",
+    "sku": "MASAGO LARANJA",
     "name": "MASAGO LARANJA",
-    "aliases": [],
+    "aliases": ["MASAGO ORANGE", "Ovas Laranja", "Capelin Roe", "masago laranja"],
     "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 0.5
+    "kgPerBox": 1
   },
   {
-    "sku": "PERNA-MANTEIGA",
-    "name": "PERNA MANTEIGA",
-    "aliases": [],
+    "sku": "PEIXE MANTEIGA",
+    "name": "PEIXE MANTEIGA",
+    "aliases": ["BUTTERFISH", "Manteiga", "Peixe Manteiga", "peixe manteiga"],
     "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 10
+    "kgPerBox": 20
   },
   {
-    "sku": "MASAGO-PRETO",
+    "sku": "MASAGO PRETO",
     "name": "MASAGO PRETO",
-    "aliases": [],
+    "aliases": ["MASAGO BLACK", "Ovas Pretas", "Capelin Roe Black", "masago preto"],
     "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 0.5
+    "kgPerBox": 1
   },
   {
-    "sku": "ANEIS-PANADOS-4-1-CX4KG",
+    "sku": "ANEIS PANADOS 4*1- CX 4 KG",
     "name": "ANEIS PANADOS 4*1- CX 4 KG",
-    "aliases": [],
+    "aliases": ["ANEIS PANADOS", "Squid Rings", "Anéis de Lula", "aneis panados"],
     "zone": "FROZEN_SEAFOOD",
     "kgPerBox": 4
   },
   {
-    "sku": "FILETE-PANANA",
-    "name": "FILETE DE PANANA",
-    "aliases": [],
+    "sku": "FILETE DE PANGA",
+    "name": "FILETE DE PANGA",
+    "aliases": ["PANGA", "Pangasius", "Filete Panga", "filete panga"],
     "zone": "FROZEN_SEAFOOD",
     "kgPerBox": 10
   },
   {
-    "sku": "AMEIJOA-CCASCA-CASTANHA",
+    "sku": "AMEIJOA C/CASCA CASTANHA",
     "name": "AMEIJOA C/CASCA CASTANHA",
-    "aliases": [],
+    "aliases": ["AMEIJOA CASTANHA", "Brown Shell Clam", "Ameijoa", "ameijoa castanha"],
+    "zone": "FROZEN_SEAFOOD",
+    "kgPerBox": 10
+  },
+  {
+    "sku": "ATUM LOMBOS VACUO",
+    "name": "ATUM LOMBOS VACUO",
+    "aliases": ["ATUM VACUO", "Tuna Loins", "Lombos Atum", "atum vacuo"],
     "zone": "FROZEN_SEAFOOD",
     "kgPerBox": 1
   },
   {
-    "sku": "ATUM-LOMBOS-VACUO",
-    "name": "ATUM LOMBOS VACUO",
-    "aliases": [],
-    "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 5
-  },
-  {
-    "sku": "CHOCO-CTINTA-SOLTO-350-500",
+    "sku": "CHOCO C/TINTA SOLTO 350/500",
     "name": "CHOCO C/TINTA SOLTO 350/500",
-    "aliases": [],
+    "aliases": ["CHOCO 350/500", "Cuttlefish w/ ink", "Choco Solto", "choco c/tinta"],
     "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 10
+    "kgPerBox": 1
   },
   {
-    "sku": "POTA-TIRAS-GRANEL",
+    "sku": "POTA TIRAS Granel",
     "name": "POTA TIRAS Granel",
-    "aliases": [],
+    "aliases": ["POTA TIRAS", "Squid Strips", "Tiras de Pota", "pota tiras"],
     "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 10
+    "kgPerBox": 6
   },
   {
-    "sku": "CARANGUEJO-BOCAS",
-    "name": "CARANGUEJO BOCAS",
-    "aliases": [],
+    "sku": "CARANGUEIJO BOCAS",
+    "name": "CARANGUEIJO BOCAS",
+    "aliases": ["BOCAS CARANGUEIJO", "Crab Claws", "Bocas", "carangueijo bocas"],
     "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 10
+    "kgPerBox": 1
   },
   {
-    "sku": "CAMARAO-SCAB-31-35",
+    "sku": "Camarao S/Cab 31/35",
     "name": "Camarao S/Cab 31/35",
-    "aliases": [],
+    "aliases": ["CAM S/C 31/35", "HLSO 31/35", "Camarão 31/35", "camarao s/cab"],
     "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 2
+    "kgPerBox": 20
   },
   {
-    "sku": "CHOCO-LIMPO-20-40",
+    "sku": "CHOCO LIMPO 20/40",
     "name": "CHOCO LIMPO 20/40",
-    "aliases": [],
+    "aliases": ["CHOCO 20/40", "Clean Cuttlefish", "Choco Limpo", "choco limpo"],
     "zone": "FROZEN_SEAFOOD",
     "kgPerBox": 10
   },
   {
-    "sku": "CARANGUEJO-PATAS",
-    "name": "CARANGUEJO PATAS",
-    "aliases": [],
+    "sku": "CARANGUEIJO PATAS",
+    "name": "CARANGUEIJO PATAS",
+    "aliases": ["PATAS CARANGUEIJO", "Crab Legs", "Patas", "carangueijo patas"],
     "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 10
+    "kgPerBox": 1
   },
   {
-    "sku": "POTA-SUJA",
+    "sku": "POTA SUJA",
     "name": "POTA SUJA",
-    "aliases": [],
+    "aliases": ["POTA INTEIRA", "Dirty Squid", "Pota Suja", "pota suja"],
     "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 10
+    "kgPerBox": 8
   },
   {
-    "sku": "CAMARAO-SCBT-INTEIRO-4-6",
-    "name": "CAMARAO S/C BT INTEIRO  4/6",
-    "aliases": [],
+    "sku": "CAMARAO BT INTEIRO 4/6",
+    "name": "CAMARAO BT INTEIRO 4/6",
+    "aliases": ["CAM BT 4/6", "Tiger Shrimp 4/6", "Black Tiger", "camarao bt 4/6"],
     "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 2
+    "kgPerBox": 1
   },
   {
-    "sku": "OVAS-BACALHAU-200-400",
+    "sku": "Ovas de Bacalhau 200/400",
     "name": "Ovas de Bacalhau 200/400",
-    "aliases": [],
+    "aliases": ["OVAS BACALHAU", "Cod Roe", "Ovas 200/400", "ovas bacalhau"],
     "zone": "FROZEN_SEAFOOD",
     "kgPerBox": 5
   },
   {
-    "sku": "MASAGO-GOLD",
+    "sku": "MASAGO GOLD",
     "name": "MASAGO GOLD",
-    "aliases": [],
+    "aliases": ["MASAGO OURO", "Ovas Gold", "Masago Gold", "masago gold"],
     "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 0.5
+    "kgPerBox": 1
   },
   {
-    "sku": "CAMARAO-BT-13-15",
+    "sku": "Camarao BT 13/15",
     "name": "Camarao BT 13/15",
-    "aliases": [],
+    "aliases": ["CAM BT 13/15", "Tiger 13/15", "Camarão BT", "camarao bt 13/15"],
     "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 2
+    "kgPerBox": 10
   },
   {
     "sku": "LAGOSTIM",
     "name": "LAGOSTIM",
-    "aliases": [],
+    "aliases": ["SCAMPI", "Lagostim", "Langoustine", "lagostim"],
     "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 2
+    "kgPerBox": 6
   },
   {
-    "sku": "CAMARAO-TIGRE-4-6-SN",
+    "sku": "CAMARAO TIGRE 4/6 SN",
     "name": "CAMARAO TIGRE 4/6 SN",
-    "aliases": [],
+    "aliases": ["TIGRE 4/6", "Tiger 4/6 SN", "Camarão Tigre", "camarao tigre"],
     "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 2
+    "kgPerBox": 18
   },
   {
-    "sku": "CAMARAO-20-30-VANNAMEI",
-    "name": "CAMARAO 20/30 Vannamei",
-    "aliases": [],
+    "sku": "CAMARAO 20/30 Vanamei",
+    "name": "CAMARAO 20/30 Vanamei",
+    "aliases": ["CAM 20/30 VAN", "Vannamei 20/30", "Camarão 20/30", "camarao 20/30"],
     "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 2
+    "kgPerBox": 20
   },
   {
-    "sku": "CAMARAO-SCAB-VAN-16-20",
+    "sku": "CAMARAO S/CAB VAN 16/20",
     "name": "CAMARAO S/CAB VAN 16/20",
-    "aliases": [],
+    "aliases": ["CAM S/C 16/20", "HLSO 16/20", "Vannamei 16/20", "camarao s/cab"],
     "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 2
+    "kgPerBox": 20
   },
   {
-    "sku": "CREPE-PRIMAVERA-MINI",
+    "sku": "CREPE PRIMAVERA MINI",
     "name": "CREPE PRIMAVERA MINI",
-    "aliases": [],
+    "aliases": ["CREPE MINI", "Spring Roll", "Crepes Primavera", "crepe mini"],
     "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 1
+    "kgPerBox": 6
   },
   {
-    "sku": "CAMARAO-BORDO-SN-40-60",
+    "sku": "CAMARAO BORDO SN 40/60",
     "name": "CAMARAO BORDO SN 40/60",
-    "aliases": [],
-    "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 2
-  },
-  {
-    "sku": "PEITO-FRANGO-OC",
-    "name": "Peito Frango OC",
-    "aliases": [],
-    "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 10
-  },
-  {
-    "sku": "PEITO-FRANGO-S-SAL",
-    "name": "Peito Frango S/Sal",
-    "aliases": [],
-    "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 10
-  },
-  {
-    "sku": "CARANGUEJO-CASCA-MOLE",
-    "name": "CARANGUEJO CASCA MOLE",
-    "aliases": [],
+    "aliases": ["CAM BORDO 40/60", "Bordo SN", "Pink Shrimp", "camarao bordo"],
     "zone": "FROZEN_SEAFOOD",
     "kgPerBox": 1
   },
   {
-    "sku": "CHURROS-4KG",
+    "sku": "Peito Frango C/S",
+    "name": "Peito Frango C/S",
+    "aliases": ["PEITO C/S", "Chicken Breast", "Peito Frango", "peito frango c/s"],
+    "zone": "FROZEN_SEAFOOD",
+    "kgPerBox": 12
+  },
+  {
+    "sku": "Peito Frango S/Sal",
+    "name": "Peito Frango S/Sal",
+    "aliases": ["PEITO S/S", "Chicken Breast No Salt", "Peito sem sal", "peito frango s/sal"],
+    "zone": "FROZEN_SEAFOOD",
+    "kgPerBox": 10
+  },
+  {
+    "sku": "CARANGUEIJO CASCA MOLE",
+    "name": "CARANGUEIJO CASCA MOLE",
+    "aliases": ["SOFT SHELL CRAB", "Caranguejo Casca Mole", "Soft Shell", "carangueijo casca mole"],
+    "zone": "FROZEN_SEAFOOD",
+    "kgPerBox": 1
+  },
+  {
+    "sku": "CHURROS 4 Kg",
     "name": "CHURROS 4 Kg",
-    "aliases": [],
+    "aliases": ["CHURROS", "Churros 4KG", "Churros congelados", "churros 4kg"],
     "zone": "FROZEN_SEAFOOD",
     "kgPerBox": 4
   },
   {
-    "sku": "CHOCO-CTINTA-SOLTO-200-300",
+    "sku": "CHOCO C/TINTA SOLTO 200/300",
     "name": "CHOCO C/TINTA SOLTO 200/300",
-    "aliases": [],
+    "aliases": ["CHOCO 200/300", "Cuttlefish w/ ink", "Choco Solto", "choco 200/300"],
     "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 10
+    "kgPerBox": 1
   },
   {
-    "sku": "ZAGAIACASTANHETA-GALERA",
+    "sku": "Zagaia-castanheta (Galera)",
     "name": "Zagaia-castanheta (Galera)",
-    "aliases": [],
-    "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 10
-  },
-  {
-    "sku": "MASAGO-WASABI",
-    "name": "MASAGO WASABI",
-    "aliases": [],
-    "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 0.5
-  },
-  {
-    "sku": "CHOCO-LIMPO-1-UP",
-    "name": "CHOCO LIMPO 1/UP",
-    "aliases": [],
-    "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 10
-  },
-  {
-    "sku": "GAMBAO-11-1020",
-    "name": "GAMBAO 11 10/20",
-    "aliases": [],
-    "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 2
-  },
-  {
-    "sku": "TUBO-POTA-U5",
-    "name": "TUBO POTA U5",
-    "aliases": [],
-    "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 10
-  },
-  {
-    "sku": "MIOLO-CAMARAO-41-50-VANNAMEI",
-    "name": "MIOLO CAMARAO 41/50 VANNAMEI",
-    "aliases": [],
-    "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 2
-  },
-  {
-    "sku": "LOMBO-MANTEIGA-ESCOLAR",
-    "name": "Lombo Manteiga/Escolar",
-    "aliases": [],
-    "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 10
-  },
-  {
-    "sku": "DOURADINHOS-PESCADA",
-    "name": "Douradinhos de Pescada",
-    "aliases": [],
+    "aliases": ["GALERA", "Zagaia", "Castanheta", "zagaia"],
     "zone": "FROZEN_SEAFOOD",
     "kgPerBox": 4
   },
   {
-    "sku": "CREPE-PRIMAVERA-MINI-45KG",
-    "name": "CREPE PRIMAVERA MINI 4.5 Kg",
-    "aliases": [],
+    "sku": "MASAGO WASABI",
+    "name": "MASAGO WASABI",
+    "aliases": ["MASAGO VERDE", "Wasabi Roe", "Masago Wasabi", "masago wasabi"],
+    "zone": "FROZEN_SEAFOOD",
+    "kgPerBox": 1
+  },
+  {
+    "sku": "CHOCO LIMPO 1/UP",
+    "name": "CHOCO LIMPO 1/UP",
+    "aliases": ["CHOCO 1/UP", "Clean Cuttlefish 1/UP", "Choco Limpo", "choco 1/up"],
+    "zone": "FROZEN_SEAFOOD",
+    "kgPerBox": 10
+  },
+  {
+    "sku": "GAMBAO L1 10/20",
+    "name": "GAMBAO L1 10/20",
+    "aliases": ["GAMBAO L1", "L1 Shrimp", "Gambão 10/20", "gambao l1"],
+    "zone": "FROZEN_SEAFOOD",
+    "kgPerBox": 12
+  },
+  {
+    "sku": "TUBO POTA U5",
+    "name": "TUBO POTA U5",
+    "aliases": ["TUBO POTA", "Squid Tube U5", "Pota U5", "tubo pota"],
+    "zone": "FROZEN_SEAFOOD",
+    "kgPerBox": 10
+  },
+  {
+    "sku": "MIOLO CAMARAO 41/50 VANNAMEI",
+    "name": "MIOLO CAMARAO 41/50 VANNAMEI",
+    "aliases": ["MIOLO 41/50", "PUD 41/50", "Miolo Vannamei", "miolo camarao"],
+    "zone": "FROZEN_SEAFOOD",
+    "kgPerBox": 20
+  },
+  {
+    "sku": "Lombo Manteiga/Escolar",
+    "name": "Lombo Manteiga/Escolar",
+    "aliases": ["ESCOLAR", "Lombo Manteiga", "Oilfish", "lombo manteiga"],
+    "zone": "FROZEN_SEAFOOD",
+    "kgPerBox": 1
+  },
+  {
+    "sku": "Douradinhos de Pescada",
+    "name": "Douradinhos de Pescada",
+    "aliases": ["DOURADINHOS", "Fish Fingers", "Douradinhos Pescada", "douradinhos"],
+    "zone": "FROZEN_SEAFOOD",
+    "kgPerBox": 6
+  },
+  {
+    "sku": "CREPE PRIMAVERA MINI 4,5 Kg",
+    "name": "CREPE PRIMAVERA MINI 4,5 Kg",
+    "aliases": ["CREPE 4.5KG", "Spring Roll Mini", "Crepe Primavera", "crepe 4.5"],
     "zone": "FROZEN_SEAFOOD",
     "kgPerBox": 4.5
   },
   {
-    "sku": "CAMARAO-SCAB-36-40",
+    "sku": "CAMARAO S/CAB 36/40",
     "name": "CAMARAO S/CAB 36/40",
-    "aliases": [],
+    "aliases": ["CAM S/C 36/40", "HLSO 36/40", "Camarão 36/40", "camarao s/cab 36/40"],
     "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 2
+    "kgPerBox": 20
   },
   {
-    "sku": "MIOLO-CAMARAO-36-40-VANNAMEI",
+    "sku": "MIOLO CAMARAO 36/40 VANNAMEI",
     "name": "MIOLO CAMARAO 36/40 VANNAMEI",
-    "aliases": [],
+    "aliases": ["MIOLO 36/40", "PUD 36/40", "Miolo Vannamei", "miolo camarao"],
     "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 2
+    "kgPerBox": 20
   },
   {
-    "sku": "DELICIAS-LAGOSTA",
+    "sku": "DELICIAS DE LAGOSTA",
     "name": "DELICIAS DE LAGOSTA",
-    "aliases": [],
+    "aliases": ["DELICIAS LAGOSTA", "Lobster Delights", "Surimi", "delicias lagosta"],
     "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 1
+    "kgPerBox": 6
   },
   {
-    "sku": "TIRAS-PANADAS",
+    "sku": "Tiras Panadas",
     "name": "Tiras Panadas",
-    "aliases": [],
+    "aliases": ["TIRAS PANADAS", "Breaded Strips", "Tiras Peixe", "tiras panadas"],
     "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 4
+    "kgPerBox": 6
   },
   {
-    "sku": "CARABINEIRO-BORDO-0-6-7",
+    "sku": "CARABINEIRO BORDO (0) 6/7",
     "name": "CARABINEIRO BORDO (0) 6/7",
-    "aliases": [],
+    "aliases": ["CARABINEIRO 6/7", "Scarlet Shrimp", "Carabineiro 0", "carabineiro bordo"],
     "zone": "FROZEN_SEAFOOD",
-    "kgPerBox": 2
+    "kgPerBox": 12
   }
 ]
