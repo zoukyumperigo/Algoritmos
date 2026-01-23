@@ -128,11 +128,11 @@ class RouteUI {
                                 <div style="font-size: 1.2rem; font-weight: bold;">${orders.length} pedidos</div>
                                 <div style="opacity: 0.9;">${totalRestaurants} restaurantes</div>
                             </div>
-                            <button onclick="routeUI.printRoute('${courierKey}')"
+                            <button onclick="routeUI.printRoute('${courierKey.replace(/'/g, "\\'")}')"
                                     style="padding: 10px 16px; background: white; color: #2563eb; border: 2px solid white; border-radius: 6px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 6px;">
                                 🖨️ Imprimir
                             </button>
-                            <button onclick="routeUI.exportRouteCSV('${courierKey}')"
+                            <button onclick="routeUI.exportRouteCSV('${courierKey.replace(/'/g, "\\'")}')"
                                     style="padding: 10px 16px; background: rgba(255,255,255,0.2); color: white; border: 2px solid white; border-radius: 6px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 6px;">
                                 💾 Exportar CSV
                             </button>
