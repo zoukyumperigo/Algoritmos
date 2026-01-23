@@ -317,7 +317,17 @@ class PickingUI {
                         <div class="dist-name">${dist.distributor}</div>
                         <div class="dist-info">${dist.totalBoxes} caixas | ${dist.totalKg.toFixed(1)} kg</div>
                     </div>
-                    <div class="dist-icon">${distIcon}</div>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <button onclick="pickingUI.printPickingByDistributor('${dist.distributor.replace(/'/g, "\\'")}', '${zone.id}')"
+                                style="padding: 10px 16px; background: white; color: ${distColor}; border: 2px solid white; border-radius: 6px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                            🖨️ Imprimir
+                        </button>
+                        <button onclick="pickingUI.exportPickingCSV('${dist.distributor.replace(/'/g, "\\'")}', '${zone.id}')"
+                                style="padding: 10px 16px; background: rgba(255,255,255,0.2); color: white; border: 2px solid white; border-radius: 6px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                            💾 Exportar CSV
+                        </button>
+                        <div class="dist-icon">${distIcon}</div>
+                    </div>
                 </div>
 
                 <table class="picking-table">
@@ -441,5 +451,332 @@ class PickingUI {
         setTimeout(() => {
             printWindow.print();
         }, 250);
+    }
+
+    /**
+     * Print picking list for a specific distributor
+     */
+    printPickingByDistributor(distributorName, zoneId) {
+        const orders = this.storage.loadOrders();
+        const filters = this.getFilters();
+        const pickingList = this.optimizer.generatePickingList(orders, filters);
+
+        if (!pickingList || pickingList.zones.length === 0) {
+            alert('Nenhuma lista de picking para imprimir');
+            return;
+        }
+
+        // Find the zone and distributor data
+        const zone = pickingList.zones.find(z => z.zone.id === zoneId);
+        if (!zone || !zone.distributors) {
+            alert('Distribuidor não encontrado');
+            return;
+        }
+
+        const dist = zone.distributors.find(d => d.distributor === distributorName);
+        if (!dist) {
+            alert('Distribuidor não encontrado');
+            return;
+        }
+
+        const distColor = this.getDistributorColor(dist.distributorInitial);
+        const distIcon = this.getDistributorIcon(dist.distributorInitial);
+
+        // Generate printable HTML
+        const printHTML = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Picking - ${distributorName}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            color: #1e293b;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid ${distColor};
+            padding-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            color: ${distColor};
+            margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+            font-size: 1.2rem;
+            color: #64748b;
+            margin-bottom: 5px;
+        }
+
+        .header .date {
+            font-size: 1rem;
+            color: #94a3b8;
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+            background: #f1f5f9;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .summary-item {
+            text-align: center;
+        }
+
+        .summary-label {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-bottom: 5px;
+        }
+
+        .summary-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: ${distColor};
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th {
+            background: ${distColor};
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            border: 1px solid ${distColor};
+        }
+
+        td {
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        .checkbox-col {
+            width: 40px;
+            text-align: center;
+        }
+
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid ${distColor};
+        }
+
+        .quantity-cell {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: ${distColor};
+        }
+
+        .total-row {
+            background: ${distColor}20 !important;
+            font-weight: bold;
+        }
+
+        .total-row td {
+            border-top: 2px solid ${distColor};
+            padding: 15px 10px;
+        }
+
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #e2e8f0;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+
+        @media print {
+            body {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>${distIcon} PICKING LIST - ${distributorName}</h1>
+        <div class="subtitle">Zona: ${zone.zone.name}</div>
+        <div class="date">${new Date().toLocaleDateString('pt-PT', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        })}</div>
+    </div>
+
+    <div class="summary">
+        <div class="summary-item">
+            <div class="summary-label">Total Produtos</div>
+            <div class="summary-value">${dist.products.length}</div>
+        </div>
+        <div class="summary-item">
+            <div class="summary-label">Total Restaurantes</div>
+            <div class="summary-value">${new Set(dist.products.flatMap(p => p.orders.map(o => o.restaurant))).size}</div>
+        </div>
+        <div class="summary-item">
+            <div class="summary-label">Total Caixas</div>
+            <div class="summary-value">${dist.totalBoxes}</div>
+        </div>
+        <div class="summary-item">
+            <div class="summary-label">Total Kg</div>
+            <div class="summary-value">${dist.totalKg.toFixed(1)}</div>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th class="checkbox-col">✓</th>
+                <th style="width: 30%;">Produto</th>
+                <th style="width: 30%;">Restaurante</th>
+                <th style="width: 15%;">Quantidade</th>
+                <th style="width: 10%;">Kg</th>
+                <th style="width: 15%;">Observações</th>
+            </tr>
+        </thead>
+        <tbody>`;
+
+        // Add products and orders
+        dist.products.forEach((product, productIndex) => {
+            product.orders.forEach((order, orderIndex) => {
+                const totalKg = (order.quantity * product.kgPerBox).toFixed(1);
+
+                printHTML += `
+            <tr>
+                <td class="checkbox-col"><input type="checkbox" class="checkbox"></td>
+                <td><strong>${product.name}</strong></td>
+                <td>${order.restaurant}</td>
+                <td class="quantity-cell">${order.quantity}</td>
+                <td style="text-align: center;">${totalKg}</td>
+                <td></td>
+            </tr>`;
+            });
+
+            // Product subtotal
+            const productTotalQty = product.orders.reduce((sum, o) => sum + o.quantity, 0);
+            const productTotalKg = (productTotalQty * product.kgPerBox).toFixed(1);
+
+            printHTML += `
+            <tr class="total-row">
+                <td colspan="3" style="text-align: right; padding-right: 10px;">Subtotal ${product.name}:</td>
+                <td class="quantity-cell">${productTotalQty}</td>
+                <td style="text-align: center; font-weight: bold;">${productTotalKg}</td>
+                <td></td>
+            </tr>`;
+        });
+
+        printHTML += `
+        </tbody>
+        <tfoot>
+            <tr class="total-row" style="background: ${distColor}40 !important;">
+                <td colspan="3" style="text-align: right; padding-right: 10px; font-size: 1.2rem;">TOTAL ${distributorName}:</td>
+                <td class="quantity-cell" style="font-size: 1.8rem;">${dist.totalBoxes}</td>
+                <td style="text-align: center; font-weight: bold; font-size: 1.2rem;">${dist.totalKg.toFixed(1)}</td>
+                <td></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div class="footer">
+        Impresso em ${new Date().toLocaleString('pt-PT')}<br>
+        Sistema de Gestão de Armazém - Século Verde
+    </div>
+</body>
+</html>`;
+
+        // Open print window
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(printHTML);
+        printWindow.document.close();
+
+        setTimeout(() => {
+            printWindow.print();
+        }, 250);
+    }
+
+    /**
+     * Export picking list for a specific distributor as CSV
+     */
+    exportPickingCSV(distributorName, zoneId) {
+        const orders = this.storage.loadOrders();
+        const filters = this.getFilters();
+        const pickingList = this.optimizer.generatePickingList(orders, filters);
+
+        if (!pickingList || pickingList.zones.length === 0) {
+            alert('Nenhuma lista de picking para exportar');
+            return;
+        }
+
+        // Find the zone and distributor data
+        const zone = pickingList.zones.find(z => z.zone.id === zoneId);
+        if (!zone || !zone.distributors) {
+            alert('Distribuidor não encontrado');
+            return;
+        }
+
+        const dist = zone.distributors.find(d => d.distributor === distributorName);
+        if (!dist) {
+            alert('Distribuidor não encontrado');
+            return;
+        }
+
+        // Build CSV content
+        let csv = 'Produto,Restaurante,Quantidade,Kg\n';
+
+        dist.products.forEach(product => {
+            product.orders.forEach(order => {
+                const totalKg = (order.quantity * product.kgPerBox).toFixed(1);
+                csv += `"${product.name}","${order.restaurant}",${order.quantity},${totalKg}\n`;
+            });
+        });
+
+        // Add totals row
+        csv += `\n"TOTAL","",${dist.totalBoxes},${dist.totalKg.toFixed(1)}\n`;
+
+        // Download CSV
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        const date = new Date().toISOString().split('T')[0];
+
+        link.setAttribute('href', url);
+        link.setAttribute('download', `picking_${distributorName.toLowerCase().replace(/\s+/g, '_')}_${date}.csv`);
+        link.style.visibility = 'hidden';
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 }

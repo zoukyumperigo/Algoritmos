@@ -123,9 +123,19 @@ class RouteUI {
                                 Rota ${routeNumber} | Prioridade: ${routePriority}
                             </div>
                         </div>
-                        <div style="text-align: right;">
-                            <div style="font-size: 1.2rem; font-weight: bold;">${orders.length} pedidos</div>
-                            <div style="opacity: 0.9;">${totalRestaurants} restaurantes</div>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <div style="text-align: right; margin-right: 15px;">
+                                <div style="font-size: 1.2rem; font-weight: bold;">${orders.length} pedidos</div>
+                                <div style="opacity: 0.9;">${totalRestaurants} restaurantes</div>
+                            </div>
+                            <button onclick="routeUI.printRoute('${courierKey}')"
+                                    style="padding: 10px 16px; background: white; color: #2563eb; border: 2px solid white; border-radius: 6px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                                🖨️ Imprimir
+                            </button>
+                            <button onclick="routeUI.exportRouteCSV('${courierKey}')"
+                                    style="padding: 10px 16px; background: rgba(255,255,255,0.2); color: white; border: 2px solid white; border-radius: 6px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                                💾 Exportar CSV
+                            </button>
                         </div>
                     </div>
                     <div style="margin-top: 15px; display: flex; gap: 30px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.3);">
@@ -563,5 +573,260 @@ class RouteUI {
 
     cancelOrderForm() {
         document.getElementById('orderFormContainer').innerHTML = '';
+    }
+
+    // =============================================
+    // PRINT & EXPORT
+    // =============================================
+
+    printRoute(courierKey) {
+        const orders = this.storage.loadOrders();
+        const distributors = this.storage.loadDistributors();
+
+        // Filter orders for this courier
+        const courierOrders = orders.filter(o =>
+            (o.distributorName === courierKey || o.distributorInitial === courierKey) &&
+            o.status === 'pending'
+        );
+
+        if (courierOrders.length === 0) {
+            alert('Nenhum pedido para imprimir para este motorista');
+            return;
+        }
+
+        // Find distributor details
+        const distributor = distributors.find(d =>
+            d.name === courierKey || d.initial === courierKey
+        );
+
+        // Calculate totals
+        const totalBoxes = courierOrders.reduce((sum, o) => sum + o.totalBoxes, 0);
+        const totalKg = courierOrders.reduce((sum, o) => sum + o.totalKg, 0);
+        const totalRestaurants = new Set(courierOrders.map(o => o.restaurantName)).size;
+
+        // Generate print HTML
+        const printHTML = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Rota ${courierKey} - ${new Date().toLocaleDateString('pt-PT')}</title>
+    <style>
+        @media print {
+            @page { margin: 1cm; }
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            font-size: 12pt;
+        }
+        h1 {
+            color: #2563eb;
+            margin-bottom: 5px;
+            font-size: 24pt;
+        }
+        .header {
+            border-bottom: 3px solid #2563eb;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            font-size: 11pt;
+        }
+        .summary {
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .summary-item {
+            text-align: center;
+        }
+        .summary-label {
+            font-size: 10pt;
+            color: #64748b;
+        }
+        .summary-value {
+            font-size: 16pt;
+            font-weight: bold;
+            color: #2563eb;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th {
+            background: #2563eb;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-size: 11pt;
+        }
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 10pt;
+        }
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+        .restaurant-name {
+            font-weight: bold;
+            font-size: 11pt;
+        }
+        .products {
+            color: #64748b;
+            line-height: 1.5;
+        }
+        .number {
+            text-align: center;
+            font-weight: bold;
+            color: #2563eb;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 2px solid #e2e8f0;
+            text-align: center;
+            color: #64748b;
+            font-size: 10pt;
+        }
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #cbd5e1;
+            display: inline-block;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚚 Rota ${courierKey}</h1>
+        <div class="info-row">
+            <span><strong>Motorista:</strong> ${courierKey}</span>
+            <span><strong>Data:</strong> ${new Date().toLocaleDateString('pt-PT')}</span>
+        </div>
+        <div class="info-row">
+            <span><strong>Rota:</strong> ${distributor ? distributor.routeNumber : '?'}</span>
+            <span><strong>Prioridade:</strong> ${distributor ? distributor.routePriority : '?'}</span>
+        </div>
+    </div>
+
+    <div class="summary">
+        <strong>RESUMO DA ROTA</strong>
+        <div class="summary-grid">
+            <div class="summary-item">
+                <div class="summary-label">Pedidos</div>
+                <div class="summary-value">${courierOrders.length}</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-label">Restaurantes</div>
+                <div class="summary-value">${totalRestaurants}</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-label">Total Caixas</div>
+                <div class="summary-value">${totalBoxes}</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-label">Total Kg</div>
+                <div class="summary-value">${totalKg.toFixed(1)}</div>
+            </div>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 40px;">✓</th>
+                <th style="width: 30%;">Restaurante</th>
+                <th>Produtos</th>
+                <th style="width: 80px; text-align: center;">Caixas</th>
+                <th style="width: 80px; text-align: center;">Kg</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${courierOrders.map(order => {
+                const products = order.items
+                    .map(item => `${item.quantity}x ${item.productName || item.productCode}`)
+                    .join('<br>');
+
+                return `
+                    <tr>
+                        <td style="text-align: center;"><span class="checkbox"></span></td>
+                        <td class="restaurant-name">${order.restaurantName}</td>
+                        <td class="products">${products}</td>
+                        <td class="number">${order.totalBoxes}</td>
+                        <td class="number">${order.totalKg.toFixed(1)}</td>
+                    </tr>
+                `;
+            }).join('')}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        <p>Século Verde Frozen Foods - Sistema de Gestão de Armazém</p>
+        <p>Impresso em ${new Date().toLocaleString('pt-PT')}</p>
+    </div>
+</body>
+</html>
+        `;
+
+        // Open print window
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(printHTML);
+        printWindow.document.close();
+
+        setTimeout(() => {
+            printWindow.print();
+        }, 250);
+    }
+
+    exportRouteCSV(courierKey) {
+        const orders = this.storage.loadOrders();
+
+        // Filter orders for this courier
+        const courierOrders = orders.filter(o =>
+            (o.distributorName === courierKey || o.distributorInitial === courierKey) &&
+            o.status === 'pending'
+        );
+
+        if (courierOrders.length === 0) {
+            alert('Nenhum pedido para exportar para este motorista');
+            return;
+        }
+
+        // Build CSV
+        let csv = 'Restaurante;Produto;Quantidade;Caixas;Kg\n';
+
+        courierOrders.forEach(order => {
+            order.items.forEach(item => {
+                csv += `${order.restaurantName};${item.productName || item.productCode};${item.quantity};${item.quantity};${(item.quantity * (item.kgPerBox || 0)).toFixed(1)}\n`;
+            });
+        });
+
+        // Download CSV
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+
+        link.setAttribute('href', url);
+        link.setAttribute('download', `rota_${courierKey}_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 }
