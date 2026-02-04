@@ -119,6 +119,13 @@ class RouteUI {
     }
 
     renderCourierRoute(courierKey, orders, distributors) {
+        // Sort orders by routePosition if available
+        orders.sort((a, b) => {
+            const posA = a.routePosition !== undefined ? a.routePosition : 999999;
+            const posB = b.routePosition !== undefined ? b.routePosition : 999999;
+            return posA - posB;
+        });
+
         // Calculate totals
         const totalBoxes = orders.reduce((sum, o) => sum + o.totalBoxes, 0);
         const totalKg = orders.reduce((sum, o) => sum + o.totalKg, 0);
@@ -177,23 +184,45 @@ class RouteUI {
                     <table class="route-table" style="width: 100%; border-collapse: collapse;">
                         <thead>
                             <tr style="background: #f8fafc;">
+                                <th style="padding: 12px; text-align: center; border-bottom: 2px solid #e2e8f0; width: 50px;">Ordem</th>
                                 <th style="padding: 12px; text-align: left; border-bottom: 2px solid #e2e8f0;">Restaurante</th>
                                 <th style="padding: 12px; text-align: left; border-bottom: 2px solid #e2e8f0;">Produtos</th>
                                 <th style="padding: 12px; text-align: center; border-bottom: 2px solid #e2e8f0;">Caixas</th>
                                 <th style="padding: 12px; text-align: center; border-bottom: 2px solid #e2e8f0;">Kg</th>
-                                <th style="padding: 12px; text-align: center; border-bottom: 2px solid #e2e8f0; width: 200px;">Ações</th>
+                                <th style="padding: 12px; text-align: center; border-bottom: 2px solid #e2e8f0; width: 270px;">Ações</th>
                             </tr>
                         </thead>
                         <tbody>
         `;
 
-        orders.forEach(order => {
+        orders.forEach((order, index) => {
             const products = order.items
                 .map(item => `${item.quantity}x ${item.productName || item.productCode}`)
                 .join(', ');
 
             html += `
                 <tr style="border-bottom: 1px solid #e2e8f0;" data-order-id="${order.id}">
+                    <td style="padding: 12px; text-align: center;">
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                            <strong style="font-size: 1.2rem; color: #2563eb;">${index + 1}</strong>
+                            <div style="display: flex; gap: 2px;">
+                                ${index > 0 ? `
+                                    <button onclick="routeUI.moveOrderUp('${order.id}', '${courierKey.replace(/'/g, "\\'")}')"
+                                            style="padding: 2px 6px; font-size: 0.75rem; background: #64748b; color: white; border: none; border-radius: 3px; cursor: pointer;"
+                                            title="Mover para cima">
+                                        ↑
+                                    </button>
+                                ` : ''}
+                                ${index < orders.length - 1 ? `
+                                    <button onclick="routeUI.moveOrderDown('${order.id}', '${courierKey.replace(/'/g, "\\'")}')"
+                                            style="padding: 2px 6px; font-size: 0.75rem; background: #64748b; color: white; border: none; border-radius: 3px; cursor: pointer;"
+                                            title="Mover para baixo">
+                                        ↓
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </td>
                     <td style="padding: 12px;">
                         <strong>${order.restaurantName}</strong>
                     </td>
@@ -991,5 +1020,83 @@ class RouteUI {
         if (window.pickingUI) {
             window.pickingUI.refresh();
         }
+    }
+
+    // =============================================
+    // REORDER DELIVERY SEQUENCE
+    // =============================================
+
+    /**
+     * Move order up in delivery sequence
+     */
+    moveOrderUp(orderId, courierKey) {
+        const orders = this.storage.loadOrders();
+
+        // Get all orders for this courier, sorted by position
+        const courierOrders = orders
+            .filter(o => (o.distributorName === courierKey || o.distributorInitial === courierKey) && o.status === 'pending')
+            .sort((a, b) => {
+                const posA = a.routePosition !== undefined ? a.routePosition : 999999;
+                const posB = b.routePosition !== undefined ? b.routePosition : 999999;
+                return posA - posB;
+            });
+
+        // Find current position
+        const currentIndex = courierOrders.findIndex(o => o.id === orderId);
+
+        if (currentIndex <= 0) return; // Already at top
+
+        // Swap positions
+        const temp = courierOrders[currentIndex].routePosition || currentIndex;
+        courierOrders[currentIndex].routePosition = courierOrders[currentIndex - 1].routePosition || (currentIndex - 1);
+        courierOrders[currentIndex - 1].routePosition = temp;
+
+        // Update orders in main array
+        courierOrders.forEach(courierOrder => {
+            const orderIndex = orders.findIndex(o => o.id === courierOrder.id);
+            if (orderIndex !== -1) {
+                orders[orderIndex].routePosition = courierOrder.routePosition;
+            }
+        });
+
+        this.storage.saveOrders(orders);
+        this.refresh();
+    }
+
+    /**
+     * Move order down in delivery sequence
+     */
+    moveOrderDown(orderId, courierKey) {
+        const orders = this.storage.loadOrders();
+
+        // Get all orders for this courier, sorted by position
+        const courierOrders = orders
+            .filter(o => (o.distributorName === courierKey || o.distributorInitial === courierKey) && o.status === 'pending')
+            .sort((a, b) => {
+                const posA = a.routePosition !== undefined ? a.routePosition : 999999;
+                const posB = b.routePosition !== undefined ? b.routePosition : 999999;
+                return posA - posB;
+            });
+
+        // Find current position
+        const currentIndex = courierOrders.findIndex(o => o.id === orderId);
+
+        if (currentIndex >= courierOrders.length - 1) return; // Already at bottom
+
+        // Swap positions
+        const temp = courierOrders[currentIndex].routePosition || currentIndex;
+        courierOrders[currentIndex].routePosition = courierOrders[currentIndex + 1].routePosition || (currentIndex + 1);
+        courierOrders[currentIndex + 1].routePosition = temp;
+
+        // Update orders in main array
+        courierOrders.forEach(courierOrder => {
+            const orderIndex = orders.findIndex(o => o.id === courierOrder.id);
+            if (orderIndex !== -1) {
+                orders[orderIndex].routePosition = courierOrder.routePosition;
+            }
+        });
+
+        this.storage.saveOrders(orders);
+        this.refresh();
     }
 }
