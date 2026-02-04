@@ -41,7 +41,13 @@ class RouteUI {
         let html = `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h3 style="margin: 0;">📊 Gestão de Rotas</h3>
-                <button onclick="routeUI.showAddOrderForm()" class="btn-success">➕ Adicionar Pedido</button>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="routeUI.markAllDelivered()"
+                            style="padding: 10px 16px; background: #10b981; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                        ✅ Marcar Todos como Entregues
+                    </button>
+                    <button onclick="routeUI.showAddOrderForm()" class="btn-success">➕ Adicionar Pedido</button>
+                </div>
             </div>
 
             <div id="orderFormContainer"></div>
@@ -128,6 +134,10 @@ class RouteUI {
                                 <div style="font-size: 1.2rem; font-weight: bold;">${orders.length} pedidos</div>
                                 <div style="opacity: 0.9;">${totalRestaurants} restaurantes</div>
                             </div>
+                            <button onclick="routeUI.markRouteDelivered('${courierKey.replace(/'/g, "\\'")}')"
+                                    style="padding: 10px 16px; background: #10b981; color: white; border: 2px solid white; border-radius: 6px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                                ✅ Entregue
+                            </button>
                             <button onclick="routeUI.printRoute('${courierKey.replace(/'/g, "\\'")}')"
                                     style="padding: 10px 16px; background: white; color: #2563eb; border: 2px solid white; border-radius: 6px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 6px;">
                                 🖨️ Imprimir
@@ -828,5 +838,101 @@ class RouteUI {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    }
+
+    // =============================================
+    // MARK AS DELIVERED
+    // =============================================
+
+    /**
+     * Mark all pending orders as delivered
+     */
+    markAllDelivered() {
+        const orders = this.storage.loadOrders();
+        const pendingOrders = orders.filter(o => o.status === 'pending');
+
+        if (pendingOrders.length === 0) {
+            alert('Não há pedidos pendentes para marcar como entregues');
+            return;
+        }
+
+        const confirmed = confirm(
+            `Tem a certeza que deseja marcar TODOS os pedidos como entregues?\n\n` +
+            `Total de pedidos pendentes: ${pendingOrders.length}\n\n` +
+            `Esta ação irá limpar todos os pedidos das listas de rotas e picking.`
+        );
+
+        if (!confirmed) return;
+
+        // Mark all pending orders as delivered
+        let markedCount = 0;
+        orders.forEach(order => {
+            if (order.status === 'pending') {
+                order.status = 'delivered';
+                order.deliveredAt = new Date().toISOString();
+                markedCount++;
+            }
+        });
+
+        this.storage.saveOrders(orders);
+
+        alert(`✅ ${markedCount} pedidos marcados como entregues!\n\nPode agora importar novos pedidos sem misturar com os anteriores.`);
+
+        // Refresh display
+        this.refresh();
+
+        // Refresh picking list if open
+        if (window.pickingUI) {
+            window.pickingUI.refresh();
+        }
+    }
+
+    /**
+     * Mark all orders from a specific courier as delivered
+     */
+    markRouteDelivered(courierKey) {
+        const orders = this.storage.loadOrders();
+
+        // Find orders for this courier
+        const courierOrders = orders.filter(o =>
+            (o.distributorName === courierKey || o.distributorInitial === courierKey) &&
+            o.status === 'pending'
+        );
+
+        if (courierOrders.length === 0) {
+            alert('Não há pedidos pendentes para este motorista');
+            return;
+        }
+
+        const confirmed = confirm(
+            `Marcar rota de ${courierKey} como entregue?\n\n` +
+            `Total de pedidos: ${courierOrders.length}\n\n` +
+            `Esta ação irá remover estes pedidos das listas de rotas e picking.`
+        );
+
+        if (!confirmed) return;
+
+        // Mark courier orders as delivered
+        let markedCount = 0;
+        orders.forEach(order => {
+            if ((order.distributorName === courierKey || order.distributorInitial === courierKey) &&
+                order.status === 'pending') {
+                order.status = 'delivered';
+                order.deliveredAt = new Date().toISOString();
+                markedCount++;
+            }
+        });
+
+        this.storage.saveOrders(orders);
+
+        alert(`✅ Rota de ${courierKey} marcada como entregue!\n\n${markedCount} pedidos concluídos.`);
+
+        // Refresh display
+        this.refresh();
+
+        // Refresh picking list if open
+        if (window.pickingUI) {
+            window.pickingUI.refresh();
+        }
     }
 }
