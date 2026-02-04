@@ -38,10 +38,23 @@ class RouteUI {
     }
 
     displayRoutes(orders, distributors) {
+        // Count delivered orders
+        const allOrders = this.storage.loadOrders();
+        const deliveredCount = allOrders.filter(o => o.status === 'delivered').length;
+
         let html = `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h3 style="margin: 0;">📊 Gestão de Rotas</h3>
-                <div style="display: flex; gap: 10px;">
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    ${deliveredCount > 0 ? `
+                        <span style="padding: 8px 12px; background: #fef3c7; color: #92400e; border-radius: 6px; font-size: 0.9rem; font-weight: 600;">
+                            📦 ${deliveredCount} pedidos entregues na base de dados
+                        </span>
+                        <button onclick="routeUI.deleteDeliveredOrders()"
+                                style="padding: 10px 16px; background: #dc2626; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                            🗑️ Eliminar Entregues
+                        </button>
+                    ` : ''}
                     <button onclick="routeUI.markAllDelivered()"
                             style="padding: 10px 16px; background: #10b981; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
                         ✅ Marcar Todos como Entregues
@@ -926,6 +939,50 @@ class RouteUI {
         this.storage.saveOrders(orders);
 
         alert(`✅ Rota de ${courierKey} marcada como entregue!\n\n${markedCount} pedidos concluídos.`);
+
+        // Refresh display
+        this.refresh();
+
+        // Refresh picking list if open
+        if (window.pickingUI) {
+            window.pickingUI.refresh();
+        }
+    }
+
+    /**
+     * Permanently delete all delivered orders from database
+     */
+    deleteDeliveredOrders() {
+        const orders = this.storage.loadOrders();
+        const deliveredOrders = orders.filter(o => o.status === 'delivered');
+
+        if (deliveredOrders.length === 0) {
+            alert('Não há pedidos entregues para eliminar');
+            return;
+        }
+
+        const confirmed = confirm(
+            `⚠️ ATENÇÃO: Esta ação é PERMANENTE!\n\n` +
+            `Vai eliminar ${deliveredOrders.length} pedidos entregues da base de dados.\n\n` +
+            `Tem a certeza que deseja continuar?\n\n` +
+            `Esta ação NÃO pode ser desfeita!`
+        );
+
+        if (!confirmed) return;
+
+        // Double confirmation for safety
+        const doubleConfirmed = confirm(
+            `Última confirmação:\n\n` +
+            `Eliminar ${deliveredOrders.length} pedidos entregues PERMANENTEMENTE?`
+        );
+
+        if (!doubleConfirmed) return;
+
+        // Keep only non-delivered orders
+        const remainingOrders = orders.filter(o => o.status !== 'delivered');
+        this.storage.saveOrders(remainingOrders);
+
+        alert(`✅ ${deliveredOrders.length} pedidos entregues eliminados com sucesso!\n\nBase de dados limpa.`);
 
         // Refresh display
         this.refresh();
