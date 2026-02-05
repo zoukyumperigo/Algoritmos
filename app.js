@@ -79,6 +79,10 @@ async function initializeApp() {
             App.picker
         );
 
+        App.rankingUI = new RankingUI(
+            App.storage
+        );
+
         App.settingsUI = new SettingsUI(
             App.storage
         );
@@ -86,6 +90,7 @@ async function initializeApp() {
         // Make UI instances globally accessible for cross-module communication
         window.routeUI = App.routeUI;
         window.pickingUI = App.pickingUI;
+        window.rankingUI = App.rankingUI;
         window.settingsUI = App.settingsUI;
 
         // Initialize navigation

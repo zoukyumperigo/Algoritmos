@@ -30,6 +30,7 @@
             <button class="nav-btn active" data-view="import">📥 Importar Pedidos</button>
             <button class="nav-btn" data-view="route">🚚 Gestão de Rotas</button>
             <button class="nav-btn" data-view="picking">📋 Lista de Picking</button>
+            <button class="nav-btn" data-view="ranking">🏆 Ranking</button>
         </nav>
 
         <!-- MAIN CONTENT AREA -->
@@ -123,6 +124,23 @@ Restaurant Golden Dragon
                 <div id="pickingListContainer" class="picking-list-container"></div>
             </section>
 
+            <!-- RANKING VIEW -->
+            <section id="rankingView" class="view">
+                <div class="view-header">
+                    <h2>🏆 Ranking de Motoristas</h2>
+                    <div class="picking-controls">
+                        <select id="rankingPeriodFilter">
+                            <option value="all">Todos os Tempos</option>
+                            <option value="month">Último Mês</option>
+                            <option value="week">Última Semana</option>
+                            <option value="today">Hoje</option>
+                        </select>
+                        <button id="refreshRankingBtn" class="btn-secondary">🔄 Atualizar</button>
+                    </div>
+                </div>
+                <div id="rankingContainer" class="ranking-container"></div>
+            </section>
+
         </main>
 
         <!-- SETTINGS MODAL -->
@@ -164,6 +182,7 @@ Restaurant Golden Dragon
     <script src="src/ui/import.js"></script>
     <script src="src/ui/route.js"></script>
     <script src="src/ui/picking.js"></script>
+    <script src="src/ui/ranking.js"></script>
     <script src="src/ui/settings.js"></script>
     <script src="app.js"></script>
 </body>

@@ -933,6 +933,11 @@ class RouteUI {
         if (window.pickingUI) {
             window.pickingUI.refresh();
         }
+
+        // Refresh ranking if open
+        if (window.rankingUI) {
+            window.rankingUI.refresh();
+        }
     }
 
     /**
@@ -981,6 +986,11 @@ class RouteUI {
         // Refresh picking list if open
         if (window.pickingUI) {
             window.pickingUI.refresh();
+        }
+
+        // Refresh ranking if open
+        if (window.rankingUI) {
+            window.rankingUI.refresh();
         }
     }
 
