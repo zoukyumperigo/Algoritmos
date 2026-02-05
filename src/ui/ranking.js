@@ -124,7 +124,6 @@ class RankingUI {
         // Sort by total boxes (main ranking metric)
         const rankedByBoxes = [...data.stats].sort((a, b) => b.totalBoxes - a.totalBoxes);
         const rankedByCustomers = [...data.stats].sort((a, b) => b.uniqueCustomers - a.uniqueCustomers);
-        const rankedByOrders = [...data.stats].sort((a, b) => b.totalOrders - a.totalOrders);
 
         let html = `
             <div style="margin-bottom: 30px;">
@@ -159,12 +158,6 @@ class RankingUI {
             <div style="margin-bottom: 30px;">
                 <h3 style="margin-bottom: 15px;">👥 Ranking por Clientes Atendidos</h3>
                 ${this.renderRankingTable(rankedByCustomers, 'customers')}
-            </div>
-
-            <!-- Ranking por Pedidos -->
-            <div style="margin-bottom: 30px;">
-                <h3 style="margin-bottom: 15px;">📦 Ranking por Número de Pedidos</h3>
-                ${this.renderRankingTable(rankedByOrders, 'orders')}
             </div>
         `;
 
