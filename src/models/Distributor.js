@@ -12,6 +12,7 @@ class Distributor {
         customers = [],
         deliveryDays = [],
         phone = '',
+        vehicle = '',
         notes = ''
     }) {
         this.initial = initial; // Single letter identifier
@@ -21,6 +22,7 @@ class Distributor {
         this.customers = customers;
         this.deliveryDays = deliveryDays; // ['Mon', 'Wed', 'Fri']
         this.phone = phone;
+        this.vehicle = vehicle; // Vehicle registration/plate
         this.notes = notes;
     }
 
@@ -54,6 +56,7 @@ class Distributor {
             customers: this.customers,
             deliveryDays: this.deliveryDays,
             phone: this.phone,
+            vehicle: this.vehicle,
             notes: this.notes
         };
     }

@@ -371,12 +371,24 @@ class SettingsUI {
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 0.95rem;">
                         <div>
                             <strong style="color: #1e293b;">📍 Clientes:</strong>
-                            <div style="color: #64748b; margin-top: 5px;">${dist.customers.join(', ')}</div>
+                            <div style="color: #64748b; margin-top: 5px;">${dist.customers.join(', ') || 'Nenhum'}</div>
                         </div>
                         <div>
                             <strong style="color: #1e293b;">📅 Dias de Entrega:</strong>
-                            <div style="color: #64748b; margin-top: 5px;">${dist.deliveryDays.join(', ')}</div>
+                            <div style="color: #64748b; margin-top: 5px;">${dist.deliveryDays.join(', ') || 'Não definido'}</div>
                         </div>
+                        ${dist.vehicle ? `
+                        <div>
+                            <strong style="color: #1e293b;">🚚 Viatura:</strong>
+                            <div style="color: #64748b; margin-top: 5px;">${dist.vehicle}</div>
+                        </div>
+                        ` : ''}
+                        ${dist.phone ? `
+                        <div>
+                            <strong style="color: #1e293b;">📞 Telefone:</strong>
+                            <div style="color: #64748b; margin-top: 5px;">${dist.phone}</div>
+                        </div>
+                        ` : ''}
                     </div>
                 </div>
             `;
@@ -434,6 +446,18 @@ class SettingsUI {
                                placeholder="Ex: Segunda, Quarta, Sexta"
                                style="width: 100%; padding: 8px; border: 2px solid #cbd5e1; border-radius: 4px;">
                     </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">🚚 Viatura / Matrícula</label>
+                        <input type="text" id="distVehicle" value="${distributor?.vehicle || ''}"
+                               placeholder="Ex: 12-AB-34"
+                               style="width: 100%; padding: 8px; border: 2px solid #cbd5e1; border-radius: 4px; text-transform: uppercase;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">📞 Telefone</label>
+                        <input type="text" id="distPhone" value="${distributor?.phone || ''}"
+                               placeholder="Ex: +351 912 345 678"
+                               style="width: 100%; padding: 8px; border: 2px solid #cbd5e1; border-radius: 4px;">
+                    </div>
                     <div style="grid-column: 1 / -1; display: flex; gap: 10px; justify-content: flex-end;">
                         <button type="button" onclick="settingsUI.cancelDistributorForm()"
                                 style="padding: 10px 20px; background: #64748b; color: white; border: none; border-radius: 6px; cursor: pointer;">
@@ -463,6 +487,8 @@ class SettingsUI {
         const routePriority = parseInt(document.getElementById('distRoutePriority').value);
         const customersText = document.getElementById('distCustomers').value.trim();
         const deliveryDaysText = document.getElementById('distDeliveryDays').value.trim();
+        const vehicle = document.getElementById('distVehicle').value.trim().toUpperCase();
+        const phone = document.getElementById('distPhone').value.trim();
 
         const customers = customersText ? customersText.split(',').map(c => c.trim()).filter(c => c) : [];
         const deliveryDays = deliveryDaysText ? deliveryDaysText.split(',').map(d => d.trim()).filter(d => d) : [];
@@ -499,7 +525,9 @@ class SettingsUI {
             routeNumber,
             routePriority,
             customers: customers.length > 0 ? customers : [],
-            deliveryDays: deliveryDays.length > 0 ? deliveryDays : ['Segunda', 'Quarta', 'Sexta']
+            deliveryDays: deliveryDays.length > 0 ? deliveryDays : ['Segunda', 'Quarta', 'Sexta'],
+            vehicle: vehicle || '',
+            phone: phone || ''
         };
 
         if (isEdit) {

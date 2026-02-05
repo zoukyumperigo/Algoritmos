@@ -774,6 +774,12 @@ class RouteUI {
             <span><strong>Rota:</strong> ${distributor ? distributor.routeNumber : '?'}</span>
             <span><strong>Prioridade:</strong> ${distributor ? distributor.routePriority : '?'}</span>
         </div>
+        ${distributor && distributor.vehicle ? `
+        <div class="info-row">
+            <span><strong>🚚 Viatura:</strong> ${distributor.vehicle}</span>
+            ${distributor.phone ? `<span><strong>📞 Telefone:</strong> ${distributor.phone}</span>` : ''}
+        </div>
+        ` : ''}
     </div>
 
     <div class="summary">
