@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Século Verde – Produtos do Mar</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <header class="navbar" id="navbar">
+    <div class="container nav-inner">
+      <a href="#" class="logo">
+        <span class="logo-leaf">🌿</span>
+        <span class="logo-text">Século <strong>Verde</strong></span>
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-label="Abrir menu">&#9776;</button>
+      <nav class="nav-links" id="navLinks">
+        <a href="#sobre">Sobre</a>
+        <a href="#produtos">Produtos</a>
+        <a href="#processo">Processo</a>
+        <a href="#contacto">Contacto</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero" id="home">
+    <div class="hero-overlay"></div>
+    <div class="container hero-content">
+      <p class="hero-tag">Qualidade do Mar à sua Mesa</p>
+      <h1>Frescura &amp; Sustentabilidade<br />em cada produto</h1>
+      <p class="hero-sub">Especialistas em preparação e congelação de produtos de pesca e aquacultura, direto das melhores origens para si.</p>
+      <div class="hero-cta">
+        <a href="#produtos" class="btn btn-primary">Ver Produtos</a>
+        <a href="#contacto" class="btn btn-outline">Fale Connosco</a>
+      </div>
+    </div>
+    <div class="hero-wave">
+      <svg viewBox="0 0 1440 80" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+        <path d="M0,40 C360,80 1080,0 1440,40 L1440,80 L0,80 Z" fill="#f8faf8"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ===== SOBRE ===== -->
+  <section class="sobre" id="sobre">
+    <div class="container sobre-grid">
+      <div class="sobre-img">
+        <div class="img-placeholder ocean-placeholder">
+          <span>🌊</span>
+        </div>
+        <div class="badge-float">
+          <strong>+15</strong>
+          <span>Anos de<br/>Experiência</span>
+        </div>
+      </div>
+      <div class="sobre-text">
+        <p class="section-tag">Quem Somos</p>
+        <h2>Comprometidos com a qualidade e o ambiente</h2>
+        <p>A <strong>Século Verde</strong> nasceu da paixão pelo mar e da vontade de levar os melhores produtos da pesca e aquacultura às famílias e empresas portuguesas, com rigorosos padrões de qualidade e sustentabilidade.</p>
+        <p>Sediados em Agualva-Cacém, contamos com infraestruturas modernas de preparação e congelação que garantem a máxima frescura e segurança alimentar em cada produto.</p>
+        <ul class="check-list">
+          <li>✔ Certificação de segurança alimentar</li>
+          <li>✔ Cadeia de frio controlada 24/7</li>
+          <li>✔ Sourcing responsável e sustentável</li>
+          <li>✔ Entrega a nível nacional</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== STATS ===== -->
+  <section class="stats">
+    <div class="container stats-grid">
+      <div class="stat-card">
+        <span class="stat-num" data-target="500">0</span><span class="stat-unit">+</span>
+        <p>Clientes Ativos</p>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num" data-target="30">0</span><span class="stat-unit">+</span>
+        <p>Espécies Disponíveis</p>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num" data-target="15">0</span><span class="stat-unit">+</span>
+        <p>Anos no Mercado</p>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num" data-target="100">0</span><span class="stat-unit">%</span>
+        <p>Satisfação Garantida</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PRODUTOS ===== -->
+  <section class="produtos" id="produtos">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-tag">Catálogo</p>
+        <h2>Os Nossos Produtos</h2>
+        <p class="section-desc">Seleção criteriosa das melhores espécies, preparadas com máximo cuidado para garantir sabor e frescura.</p>
+      </div>
+      <div class="produtos-grid">
+        <div class="produto-card">
+          <div class="produto-icon">🐟</div>
+          <h3>Peixe Fresco Congelado</h3>
+          <p>Variedade de espécies seleccionadas, capturadas nas melhores zonas de pesca e congeladas de imediato.</p>
+          <a href="#contacto" class="card-link">Saber mais →</a>
+        </div>
+        <div class="produto-card">
+          <div class="produto-icon">🦐</div>
+          <h3>Marisco &amp; Crustáceos</h3>
+          <p>Gambas, camarão, lagostim e muito mais, com garantia de qualidade e rastreabilidade total.</p>
+          <a href="#contacto" class="card-link">Saber mais →</a>
+        </div>
+        <div class="produto-card featured">
+          <div class="badge-featured">Destaque</div>
+          <div class="produto-icon">🐙</div>
+          <h3>Cefalópodes</h3>
+          <p>Polvo, lula e choco preparados e congelados individualmente para máxima conveniência.</p>
+          <a href="#contacto" class="card-link">Saber mais →</a>
+        </div>
+        <div class="produto-card">
+          <div class="produto-icon">🐠</div>
+          <h3>Aquacultura</h3>
+          <p>Produtos de aquacultura certificada, com controlo rigoroso desde a produção até à entrega.</p>
+          <a href="#contacto" class="card-link">Saber mais →</a>
+        </div>
+        <div class="produto-card">
+          <div class="produto-icon">🧊</div>
+          <h3>Preparados &amp; Porcionados</h3>
+          <p>Filetes, postas e outros cortes prontos a cozinhar, poupando tempo na cozinha.</p>
+          <a href="#contacto" class="card-link">Saber mais →</a>
+        </div>
+        <div class="produto-card">
+          <div class="produto-icon">📦</div>
+          <h3>Embalamentos B2B</h3>
+          <p>Soluções de embalamento em granel e pré-porcionado adaptadas a restaurantes e distribuição.</p>
+          <a href="#contacto" class="card-link">Saber mais →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PROCESSO ===== -->
+  <section class="processo" id="processo">
+    <div class="container">
+      <div class="section-header light">
+        <p class="section-tag">Como Trabalhamos</p>
+        <h2>Do Mar à sua Mesa</h2>
+      </div>
+      <div class="processo-steps">
+        <div class="step">
+          <div class="step-num">01</div>
+          <h4>Captura &amp; Sourcing</h4>
+          <p>Parceria com pescadores e aquicultores certificados nas melhores zonas de produção.</p>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <h4>Controlo de Qualidade</h4>
+          <p>Inspeção rigorosa à chegada para garantir frescura e conformidade alimentar.</p>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <h4>Preparação &amp; Congelação</h4>
+          <p>Processamento em instalações HACCP, congelação rápida que preserva sabor e nutrientes.</p>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step">
+          <div class="step-num">04</div>
+          <h4>Entrega em Frio</h4>
+          <p>Logística refrigerada que mantém a cadeia de frio intacta até ao destino final.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CONTACTO ===== -->
+  <section class="contacto" id="contacto">
+    <div class="container contacto-grid">
+      <div class="contacto-info">
+        <p class="section-tag">Contacte-nos</p>
+        <h2>Vamos trabalhar juntos?</h2>
+        <p>Seja para encomendas, parcerias ou simplesmente para saber mais sobre os nossos produtos, a nossa equipa está pronta para ajudar.</p>
+        <ul class="info-list">
+          <li>
+            <span class="info-icon">📍</span>
+            <div>
+              <strong>Morada</strong>
+              <span>Agualva-Cacém, Lisboa, Portugal</span>
+            </div>
+          </li>
+          <li>
+            <span class="info-icon">📞</span>
+            <div>
+              <strong>Telefone</strong>
+              <span>+351 XXX XXX XXX</span>
+            </div>
+          </li>
+          <li>
+            <span class="info-icon">✉️</span>
+            <div>
+              <strong>Email</strong>
+              <span>geral@seculoverde.pt</span>
+            </div>
+          </li>
+          <li>
+            <span class="info-icon">🕘</span>
+            <div>
+              <strong>Horário</strong>
+              <span>Segunda–Sexta: 9h–18h</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <form class="contacto-form" id="contactForm" novalidate>
+        <div class="form-group">
+          <label for="nome">Nome</label>
+          <input type="text" id="nome" name="nome" placeholder="O seu nome" required />
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="email@exemplo.pt" required />
+        </div>
+        <div class="form-group">
+          <label for="empresa">Empresa (opcional)</label>
+          <input type="text" id="empresa" name="empresa" placeholder="Nome da empresa" />
+        </div>
+        <div class="form-group">
+          <label for="mensagem">Mensagem</label>
+          <textarea id="mensagem" name="mensagem" rows="4" placeholder="Como podemos ajudar?" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary full-width">Enviar Mensagem</button>
+        <p class="form-success" id="formSuccess">✅ Mensagem enviada! Entraremos em contacto brevemente.</p>
+      </form>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <span class="logo-leaf">🌿</span>
+        <span class="logo-text">Século <strong>Verde</strong></span>
+        <p>Qualidade e sustentabilidade em cada produto do mar.</p>
+      </div>
+      <div class="footer-links">
+        <h5>Navegação</h5>
+        <a href="#sobre">Sobre Nós</a>
+        <a href="#produtos">Produtos</a>
+        <a href="#processo">Processo</a>
+        <a href="#contacto">Contacto</a>
+      </div>
+      <div class="footer-links">
+        <h5>Legal</h5>
+        <a href="#">Política de Privacidade</a>
+        <a href="#">Termos de Uso</a>
+        <a href="#">Cookies</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2024 Século Verde – Unipessoal Lda. Todos os direitos reservados.</p>
+    </div>
+  </footer>
+
+  <a href="#home" class="back-to-top" id="backToTop" aria-label="Voltar ao topo">↑</a>
+
+  <script src="script.js"></script>
+</body>
+</html>
